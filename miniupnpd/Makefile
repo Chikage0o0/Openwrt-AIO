@@ -13,7 +13,7 @@ PKG_RELEASE:=
 
 PKG_SOURCE_URL:=https://miniupnp.tuxfamily.org/files
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_HASH:=4b01c403d01c6ab140c9e4e744c89cdb66cbe25145d7a0d4566cc3fdcc0240c3
+PKG_HASH:=skip
 
 PKG_MAINTAINER:=
 PKG_LICENSE:=BSD-3-Clause
