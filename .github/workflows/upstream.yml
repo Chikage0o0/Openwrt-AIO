@@ -44,7 +44,11 @@ jobs:
         #uu游戏加速器
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-uugamebooster
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/uugamebooster
-        
+
+        # vlmcsd
+        svn export https://github.com/siwind/luci-app-vlmcsd/trunk ./luci-app-vlmcsd
+        svn export https://github.com/siwind/openwrt-vlmcsd/trunk ./openwrt-vlmcsd
+
     - name: 解决冲突
       run: |
         sed -i 's#../../luci.mk#$(TOPDIR)/feeds/luci/luci.mk#g' */Makefile
