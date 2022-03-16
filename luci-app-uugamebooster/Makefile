@@ -5,7 +5,7 @@ LUCI_DEPENDS:=+uugamebooster
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-uugamebooster
-PKG_RELEASE:=
+PKG_RELEASE:=$(COMMITCOUNT)
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
