@@ -38,16 +38,19 @@ jobs:
         git rm -r --cache * >/dev/null 2>&1 &
         rm -rf `find ./* -maxdepth 0 -type d ! -name "patch"` >/dev/null 2>&1
 
-        #miniupnpd支持强行映射
+        # miniupnpd支持强行映射
         svn export https://github.com/hzyitc/miniupnpd-openwrt-ptpt52-mod/trunk/miniupnpd
 
-        #uu游戏加速器
+        # uu游戏加速器
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-uugamebooster
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/uugamebooster
 
         # vlmcsd
         svn export https://github.com/siwind/luci-app-vlmcsd/trunk ./luci-app-vlmcsd
         svn export https://github.com/siwind/openwrt-vlmcsd/trunk ./openwrt-vlmcsd
+
+        # ssr-plus以及其依赖
+        svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-ssr-plus
 
     - name: 解决冲突
       run: |
