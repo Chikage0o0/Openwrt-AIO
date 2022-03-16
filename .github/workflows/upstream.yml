@@ -49,13 +49,29 @@ jobs:
         svn export https://github.com/siwind/luci-app-vlmcsd/trunk ./luci-app-vlmcsd
         svn export https://github.com/siwind/openwrt-vlmcsd/trunk ./openwrt-vlmcsd
 
-        # ssr-plus以及其依赖
+        # ssr-plus
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-ssr-plus
+        
+        # passwall
+        svn export https://github.com/xiaorouji/openwrt-passwall/branches/luci/luci-app-passwall
+
+        # passwall以及ssr-plus的依赖
+        git clone --depth 1 -b packages https://github.com/xiaorouji/openwrt-passwall
+        mv -n `find openwrt-passwall/* -maxdepth 0 -type d` ./ && rm -rf openwrt-passwall
+
+
+    - name: 删除多余文件
+      run: |
+        rm -rf .svn
+        rm -rf ./*/.git
+        rm -rf ./*/.github
+        rm -rf ./*/.svn 
+        rm -f .gitattributes .gitignore
+        rm -f README.md
 
     - name: 解决冲突
       run: |
         sed -i 's#../../luci.mk#$(TOPDIR)/feeds/luci/luci.mk#g' */Makefile
-          
           
     - name: 提交
       run: |
