@@ -34,8 +34,22 @@ jobs:
 
     - name: 同步上游
       run: |
-        svn export https://github.com/hzyitc/miniupnpd-openwrt-ptpt52-mod/trunk/miniupnpd 
+        #miniupnpd支持强行映射
+        svn export https://github.com/hzyitc/miniupnpd-openwrt-ptpt52-mod/trunk/miniupnpd
+
+        #uu游戏加速器
+        svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-uugamebooster
+        svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/uugamebooster
         
+    - name: 解决冲突
+      run: |
+        sed -i \
+          -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' \
+          -e "s/\(PKG_HASH\|PKG_MD5SUM\|PKG_MIRROR_HASH\):=.*/\1:=skip/" \
+          -e 's?\.\./\.\./luci.mk?$(TOPDIR)/feeds/luci/luci.mk?' \
+          -e 's/ca-certificates/ca-bundle/' \
+          */Makefile
+          
     - name: 提交
       run: |
         Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
