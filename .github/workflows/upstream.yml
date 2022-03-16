@@ -58,6 +58,7 @@ jobs:
         # passwall以及ssr-plus的依赖
         git clone --depth 1 -b packages https://github.com/xiaorouji/openwrt-passwall
         mv -n `find openwrt-passwall/* -maxdepth 0 -type d` ./ && rm -rf openwrt-passwall
+        svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/redsocks2
 
 
     - name: 删除多余文件
