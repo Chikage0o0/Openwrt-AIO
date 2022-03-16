@@ -79,8 +79,6 @@ jobs:
         rm -rf ./*/.svn
         rm -rf ./*/README.md
         rm -rf ./*/LICENSE
-        rm -f .gitattributes .gitignore
-        rm -f README.md
 
     - name: 解决冲突
       run: |
