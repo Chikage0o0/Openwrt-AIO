@@ -60,6 +60,12 @@ jobs:
         mv -n `find openwrt-passwall/* -maxdepth 0 -type d` ./ && rm -rf openwrt-passwall
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/redsocks2
 
+        # 主题
+        svn export https://github.com/jerrykuku/luci-theme-argon/trunk ./luci-theme-argon
+        svn export https://github.com/jerrykuku/luci-app-argon-config/trunk ./luci-app-argon-config
+        svn export https://github.com/thinktip/luci-theme-neobird/trunk ./luci-theme-neobird
+        svn export https://github.com/Chikage0o0/luci-theme-infinityfreedom/trunk/luci-theme-infinityfreedom
+
 
     - name: 删除多余文件
       run: |
