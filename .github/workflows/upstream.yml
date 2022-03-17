@@ -12,7 +12,7 @@ on:
       - '.github/workflows/upstream.yml'
       - '.gitignore'
   schedule:
-    - cron: 0 */12 * * *
+    - cron: 0 0 * * *
   repository_dispatch:
 
 jobs:

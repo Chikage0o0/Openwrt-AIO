@@ -1,0 +1,95 @@
+#
+# This is free software, lisence use MIT.
+# 
+# 
+# <https://github.com/Chikage0o0/openwrt-packages>
+#
+
+name: Compile-ipk
+on:
+  push:
+    paths-ignore:
+      - '.github/workflows/**'
+      - '.gitignore'
+      - 'README.md'
+  workflow_dispatch:
+
+env:
+  SDK_URL: https://downloads.openwrt.org/releases/21.02.2/targets/x86/64/openwrt-sdk-21.02.2-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+  DIFF_CONFIG_FILE: patch/x86-64.config
+  REMOTE_PATH: drive:Public/Openwrt/Package/x86_64/
+  TZ: Asia/Shanghai
+
+jobs:
+  compile-x86:
+    runs-on: Ubuntu-20.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: 配置RCLONE
+      uses: NiceLabs/rclone-action@master
+      with:
+        github-token: ${{ secrets.SECRET_TOKEN }}
+        config: ${{ secrets.RCLONE_CONFIG }}
+        config-secret-name: RCLONE_CONFIG
+
+    - name: 安装环境
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo apt-get -qq update 
+        sudo apt-get -qq install  build-essential ccache ecj fastjar file g++ gawk \
+          gettext git java-propose-classpath libelf-dev libncurses5-dev \
+          libncursesw5-dev libssl-dev python python2.7-dev python3 unzip wget \
+          python3-distutils python3-setuptools python3-dev rsync subversion \
+          swig time xsltproc zlib1g-dev upx
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        
+    - name: 下载SDK
+      run: |
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+        wget -qO openwrt-sdk.tar.xz $SDK_URL
+        tar xJf openwrt-sdk.tar.xz
+        rm -f openwrt-sdk.tar.xz
+        mv openwrt-sdk* /workdir/openwrt
+
+    - name: 添加本地源
+      run: |
+        cd /workdir/openwrt
+        echo "src-link custom $GITHUB_WORKSPACE">> feeds.conf.default
+        ./scripts/feeds update -a
+        ./scripts/feeds install -p custom -a
+        ln -s /usr/bin/upx staging_dir/host/bin/
+
+    - name: 下载依赖
+      id: package
+      run: |
+        cd /workdir/openwrt
+        cp $GITHUB_WORKSPACE/$DIFF_CONFIG_FILE .config 
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    - name: 编译
+      run: |
+        # 获取最近一次更新更改的package列表
+        cd $GITHUB_WORKSPACE
+        ipk_list=($(git log  --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | sort | uniq))
+
+        cd /workdir/openwrt
+        for ipk in ${ipk_list[@]}
+        {
+          make package/$ipk/compile -j$(($(nproc)+1)) || make package/$ipk/compile V=s >>error_$ipk.log 2>&1 || true
+        }
+        make package/index
+
+    - name: 上传至目标存储
+      run: copy /workdir/openwrt/bin/packages/x86_64/custom/ $REMOTE_PATH
+        env:
+          RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASS }}
+    
