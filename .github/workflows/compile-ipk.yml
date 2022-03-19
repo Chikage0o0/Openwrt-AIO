@@ -10,6 +10,11 @@ on:
   repository_dispatch:
     types: [Compile-IPK]
   workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'Debug Mode'
+        required: false
+        default: 'false'
 
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
@@ -43,7 +48,15 @@ jobs:
         sudo chown $USER:$GROUPS /workdir
         mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
         rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
-  
+
+    - uses: shaowenchen/debugger-action@v2
+      if: github.event.inputs.ssh == 'true'
+      name: debugger
+      timeout-minutes: 100
+      continue-on-error: true
+      with:
+        ngrok_token: ${{ secrets.NGROK_TOKEN }}
+
     - name: 编译
       id: compile
       run: |
@@ -53,17 +66,21 @@ jobs:
             -v /workdir/error/:/home/build/openwrt/error/  \
              openwrtorg/sdk:${{matrix.target}}-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
 
-        echo "::set-output name=error::`ls -A /workdir/error/`"
+        if [`ls -A /workdir/error/` == ""] ;then
+          echo "{compile_error}={false}" >> $GITHUB_ENV
+        else
+          echo "{compile_error}={true}" >> $GITHUB_ENV
+        fi
 
     - name: 如果出现失败上传Artifact
-      if: ${{ steps.compile.outputs.error }} != ""
+      if: ${{ env.compile_error }} 
       uses: actions/upload-artifact@v3
       with:
         name: ${{matrix.target}}-error
         path: /workdir/error/
     
     - name: 如果出现失败通知TG
-      if: ${{ steps.compile.outputs.error }} != "" && $USE_TG
+      if: ${{ env.compile_error }} && ${{ env.USE_TG }}
       uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_TO }}
