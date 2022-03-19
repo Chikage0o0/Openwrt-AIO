@@ -1,0 +1,23 @@
+#
+# This is free software, lisence use MIT.
+# 
+# 
+# <https://github.com/Chikage0o0/openwrt-packages>
+#
+
+name: test
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: Ubuntu-20.04
+
+    strategy: 
+      fail-fast: false   
+      matrix: 
+        node: [10, 12, 14]
+
+    steps:
+      - id: set-matrix
+        run: echo ${{ toJSON(matrix) }
