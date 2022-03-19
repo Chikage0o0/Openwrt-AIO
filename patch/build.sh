@@ -1,5 +1,5 @@
 #!/bin/bash
-USER=-`id -u`
+USER=`id -u`
 GROUPS=`id -g`
 sudo chown -R $USER:$GROUPS /home/build
 # 修复upx异常

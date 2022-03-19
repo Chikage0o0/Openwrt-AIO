@@ -39,7 +39,7 @@ jobs:
 
     - name: 准备环境
       run: |
-        USER=-`id -u`
+        USER=`id -u`
         GROUPS=`id -g`
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
