@@ -13,7 +13,6 @@ on:
       - '.gitignore'
   schedule:
     - cron: 0 0 * * *
-  repository_dispatch:
 
 jobs:
   merge:
