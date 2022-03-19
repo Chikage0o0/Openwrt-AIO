@@ -12,15 +12,21 @@ on:
   workflow_dispatch:
 
 env:
+  REMOTE_PATH: drive:Public/Openwrt/Package
   VERSION: 21.02.2
-
+  
 jobs:
   compile-ipk:
     runs-on: Ubuntu-20.04
 
-    strategy:    
+    strategy: 
+      fail-fast: false   
       matrix:
-        target: [x86-64, ramips-mt7621]
+        include:
+         - target: x86-64
+           target_path: x86_64
+         - target: ramips-mt7621
+           target_path: mipsel_24kc
 
     steps:
     - name: Checkout
@@ -39,9 +45,10 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         mkdir -p /workdir/bin/ $$ mkdir -p /workdir/error/
-        rclone copy $REMOTE_PATH/${{matrix.target}}/ /workdir/bin/packages/${{matrix.target}}/custom/ || true
+        rclone copy $REMOTE_PATH/${{matrix.target_path}} /workdir/bin/packages/${{matrix.target_path}}/custom/ || true
   
     - name: 编译
+      id: compile
       run: |
         docker run --rm -v /workdir/bin/:/home/build/openwrt/bin/  \
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
@@ -49,7 +56,10 @@ jobs:
             -v /workdir/error/:/home/build/openwrt/error/  \
              openwrtorg/sdk:${{matrix.target}}-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
 
-    - name: 如果出现失败上传日志到artifact
+        echo "::set-output name=error::`ls -A /workdir/error/`"
+
+    - name: 如果出现失败发送通知
+      if: ${{ steps.compile.outputs.error }} != ""
       uses: actions/upload-artifact@v3
       with:
         name: ${{matrix.target}}-error
@@ -57,6 +67,6 @@ jobs:
         
     - name: 上传至目标存储
       run: |
-        rclone delete $REMOTE_PATH || true
-        rclone copy /workdir/bin/packages/${{matrix.target}}/custom/ $REMOTE_PATH/${{matrix.target}}/
+        rclone delete $REMOTE_PATH/${{matrix.target_path}}/ || true
+        rclone copy /workdir/bin/packages/${{matrix.target_path}}/custom/ $REMOTE_PATH/${{matrix.target_path}}/
     
