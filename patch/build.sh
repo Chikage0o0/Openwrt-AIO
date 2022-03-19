@@ -19,11 +19,27 @@ ipk_list=($(git log  --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | s
 cd /home/build/openwrt
 
 # 编译
-
 for ipk in ${ipk_list[@]}
 {
   echo "start compile $ipk"
   make package/$ipk/{clean,compile} -j2   || make package/$ipk/{clean,compile} V=s >> error/error_$ipk.log 2>&1 
 }
+
+# 移动Kmod
+mvkmod(){
+  if [ `find bin/targets -name $1` ];then
+    if [ `find bin/packages -name $1` ];then
+      for ipk in `find bin/packages -name $1`; do
+        rm -f $ipk
+      done
+    fi
+    for ipk in `find bin/targets -name $1`; do
+      cp $ipk `find bin/packages -name custom`
+    done
+  fi
+}
+
+mvkmod "kmod-r8125*.ipk"
+
 make package/index
 
