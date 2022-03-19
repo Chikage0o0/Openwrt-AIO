@@ -7,11 +7,8 @@
 
 name: Compile-Ipk
 on:
-  push:
-    paths-ignore:
-      - '.github/workflows/**'
-      - '.gitignore'
-      - 'README.md'
+  repository_dispatch:
+    types: [Compile-IPK]
   workflow_dispatch:
 
 env:
@@ -55,7 +52,7 @@ jobs:
     - name: 如果出现失败上传日志到artifact
       uses: actions/upload-artifact@v3
       with:
-        name: my-artifact
+        name: ${{matrix.target}}-error
         path: /workdir/error/
         
     - name: 上传至目标存储

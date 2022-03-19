@@ -94,6 +94,12 @@ jobs:
         git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]} Sync $(date +%Y-%m-%d" "%H:%M:%S)"
         git push -f
 
+    - name: 触发编译
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.SECRET_TOKEN }}
+        event-type: Compile-IPK
+
     - name: 删除历史Action记录
       uses: Mattraks/delete-workflow-runs@main
       continue-on-error: true
