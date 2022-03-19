@@ -19,11 +19,11 @@ ipk_list=($(git log  --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | s
 cd /home/build/openwrt
 
 # 编译
-make package/feeds/luci/luci-base/compile
+make package/feeds/luci/luci-base/compile -j2
 for ipk in ${ipk_list[@]}
 {
   echo "start compile $ipk"
-  make package/feeds/custom/$ipk/compile -j2 >> /dev/null 2>&1   || make package/$ipk/compile V=s >> error/error_$ipk.log 2>&1 
+  make package/feeds/custom/$ipk/compile -j2    || make package/$ipk/compile V=s >> error/error_$ipk.log 2>&1 
 }
 target_path=`find bin/packages -name custom`
 
