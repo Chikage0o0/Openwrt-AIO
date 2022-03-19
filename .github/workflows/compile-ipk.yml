@@ -45,7 +45,7 @@ jobs:
         rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
 
     - name: 转储签名
-      run: echo ${{ secrets.SECRET_KEY }} > /workdir/key-build
+      run: echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
 
     - name: 编译
       id: compile
