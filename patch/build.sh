@@ -1,7 +1,5 @@
 #!/bin/bash
-USER=`id -u`
-GROUPS=`id -g`
-sudo chown -R $USER:$GROUPS /home/build
+sudo chown -R 1000:1000 /home/build
 # 修复upx异常
 sudo apt-get update
 sudo apt-get install upx git -y

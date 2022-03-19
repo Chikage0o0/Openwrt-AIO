@@ -39,8 +39,6 @@ jobs:
 
     - name: 准备环境
       run: |
-        USER=`id -u`
-        GROUPS=`id -g`
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         mkdir -p /workdir/bin/ $$ mkdir -p /workdir/error/
@@ -48,12 +46,10 @@ jobs:
   
     - name: 编译
       run: |
-        USER=-`id -u`
-        GROUPS=`id -g`
         docker run --rm -v /workdir/bin/:/home/build/openwrt/bin/  \
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
             -v $GITHUB_WORKSPACE/$DIFF_CONFIG_FILE:/home/build/openwrt/custom.config \
-            -v /workdir/error/:/home/build/openwrt/error/ -u $USER:$GROUPS \
+            -v /workdir/error/:/home/build/openwrt/error/ -u 1000:1000 \
              openwrtorg/sdk:$TARGET-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
 
     - name: 如果出现失败上传日志到artifact
