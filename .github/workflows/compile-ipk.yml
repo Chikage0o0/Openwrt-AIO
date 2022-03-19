@@ -66,9 +66,9 @@ jobs:
              openwrtorg/sdk:${{matrix.target}}-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
 
         if [`ls -A /workdir/error/` == ""] ;then
-          echo "{compile_error}={false}" >> $GITHUB_ENV
+          echo "compile_error=false" >> $GITHUB_ENV
         else
-          echo "{compile_error}={true}" >> $GITHUB_ENV
+          echo "compile_error=true" >> $GITHUB_ENV
         fi
 
     - name: 如果出现失败上传Artifact

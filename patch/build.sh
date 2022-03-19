@@ -36,7 +36,7 @@ function mvKmod(){
   fi
 }
 
-mvkmod "kmod-r8125*.ipk"
+mvKmod "kmod-r8125*.ipk"
 
 # 删除旧的ipk
 function RmOldIpk(){
