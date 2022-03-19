@@ -74,14 +74,14 @@ jobs:
         sudo chown $USER:$GROUPS $GITHUB_WORKSPACE
 
     - name: 如果出现失败上传Artifact
-      if: ${{ env.compile_error }} 
+      if: ${{ env.compile_error }} == "true"
       uses: actions/upload-artifact@v3
       with:
         name: ${{matrix.target}}-error
         path: /workdir/error/
     
     - name: 如果出现失败通知TG
-      if: ${{ env.compile_error }} && ${{ env.USE_TG }}
+      if: ${{ env.compile_error }} == "true" && ${{ env.USE_TG }} == "true"
       uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_TO }}
