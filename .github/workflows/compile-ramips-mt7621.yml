@@ -42,7 +42,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         mkdir -p /workdir/bin/ $$ mkdir -p /workdir/error/
-        rclone copy $REMOTE_PATH $LOCAL_PATH 
+        rclone copy $REMOTE_PATH $LOCAL_PATH || true
   
     - name: 编译
       run: |
