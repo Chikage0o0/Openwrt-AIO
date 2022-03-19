@@ -59,11 +59,11 @@ jobs:
     - name: 编译
       id: compile
       run: |
-        docker run --rm -v /workdir/packages/:/home/build/packages/  \
-            -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
-            -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
-            -v /workdir/error/:/home/build/openwrt/error/  \
-             openwrtorg/sdk:${{matrix.target}}-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
+        # docker run --rm -v /workdir/packages/:/home/build/packages/  \
+        #     -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
+        #     -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
+        #     -v /workdir/error/:/home/build/openwrt/error/  \
+        #      openwrtorg/sdk:${{matrix.target}}-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
 
         if [`ls -A /workdir/error/` == ""] ;then
           echo "compile_error=false" >> $GITHUB_ENV
@@ -74,14 +74,14 @@ jobs:
         sudo chown $USER:$GROUPS $GITHUB_WORKSPACE
 
     - name: 如果出现失败上传Artifact
-      if: ${{ env.compile_error }} == "true"
+      if: env.compile_error == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: ${{matrix.target}}-error
         path: /workdir/error/
     
     - name: 如果出现失败通知TG
-      if: ${{ env.compile_error }} == "true" && ${{ env.USE_TG }} == "true"
+      if: env.compile_error == 'true' && env.USE_TG == 'true'
       uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_TO }}
