@@ -1,17 +1,17 @@
 #!/bin/bash
 sudo chown -R 1000:1000 /home/build
 # 修复upx异常
-sudo apt-get update
-sudo apt-get install upx git -y
+sudo apt-get update >> /dev/null 2>&1 
+sudo apt-get install upx git -y >> /dev/null 2>&1 
 ln -s /usr/bin/upx staging_dir/host/bin/upx
 
 # 添加并安装源
 echo "src-link custom /home/build/custom-feed" >> feeds.conf.default
-./scripts/feeds update -a
-./scripts/feeds install -p custom -a
+./scripts/feeds update -a >> /dev/null 2>&1 
+./scripts/feeds install -p custom -a >> /dev/null 2>&1 
 
 cp -rf custom.config .config
-make defconfig
+make defconfig >> /dev/null 2>&1 
 
 # 获取编译的包列表
 cd /home/build/custom-feed
@@ -23,9 +23,16 @@ make package/feeds/luci/luci-base/compile
 for ipk in ${ipk_list[@]}
 {
   echo "start compile $ipk"
-  make package/feeds/custom/$ipk/compile -j2   || make package/$ipk/compile V=s >> error/error_$ipk.log 2>&1 
+  make package/feeds/custom/$ipk/compile -j2 >> /dev/null 2>&1   || make package/$ipk/compile V=s >> error/error_$ipk.log 2>&1 
 }
 target_path=`find bin/packages -name custom`
+
+# 解决单编译kmod 导致package不存在问题
+if [$target_path == ""];then
+  make package/feeds/custom/tcping/compile -j2
+  target_path=`find bin/packages -name custom`
+fi
+
 # 移动Kmod
 function mvKmod(){
   if [ `find bin/targets -name $1` ];then
@@ -46,11 +53,11 @@ function RmOldIpk(){
   fi
 }
 for newipk in `ls $target_path`; do
-  RmOldIpk ${ipk%%_*}
+  RmOldIpk ${newipk%%_*}
 done
 
 # 生成索引
 mv /home/build/packages/* $target_path
-make package/index
+make package/index >> /dev/null 2>&1 
 mv $target_path/* /home/build/packages
 
