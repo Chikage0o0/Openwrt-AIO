@@ -23,7 +23,7 @@ cd /home/build/openwrt
 for ipk in ${ipk_list[@]}
 {
   echo "start compile $ipk"
-  make package/$ipk/{clean,compile} -j2  || make package/$ipk/{clean,compile} V=s >> error/error_$ipk.log 2>&1 
+  make package/$ipk/{clean,compile} -j2   || make package/$ipk/{clean,compile} V=s >> error/error_$ipk.log 2>&1 
 }
 make package/index
 

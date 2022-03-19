@@ -5,7 +5,7 @@
 # <https://github.com/Chikage0o0/openwrt-packages>
 #
 
-name: Compile-x86-64
+name: Compile-ramips-mt7621
 on:
   push:
     paths-ignore:
@@ -15,10 +15,10 @@ on:
   workflow_dispatch:
 
 env:
-  DIFF_CONFIG_FILE: patch/x86-64.config
-  REMOTE_PATH: drive:Public/Openwrt/Package/x86_64/
-  LOCAL_PATH: /workdir/bin/packages/x86_64/custom/
-  TARGET: x86-64
+  DIFF_CONFIG_FILE: patch/ramips-mt7621.config
+  REMOTE_PATH: drive:Public/Openwrt/Package/ramips-mt7621/
+  LOCAL_PATH: /workdir/bin/packages/ramips-mt7621/custom/
+  TARGET: ramips-mt7621
   VERSION: 21.02.2
 
 jobs:
@@ -49,7 +49,7 @@ jobs:
         docker run --rm -v /workdir/bin/:/home/build/openwrt/bin/  \
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
             -v $GITHUB_WORKSPACE/$DIFF_CONFIG_FILE:/home/build/openwrt/custom.config \
-            -v /workdir/error/:/home/build/openwrt/error/  \
+            -v /workdir/error/:/home/build/openwrt/error/ \
              openwrtorg/sdk:$TARGET-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
 
     - name: 如果出现失败上传日志到artifact
