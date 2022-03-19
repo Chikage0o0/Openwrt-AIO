@@ -70,6 +70,9 @@ jobs:
         # svn export https://github.com/thinktip/luci-theme-neobird/trunk ./luci-theme-neobird 不支持Openwrt最新版
         svn export https://github.com/Chikage0o0/luci-theme-infinityfreedom/trunk/luci-theme-infinityfreedom
 
+        # 灵缇加速器
+        git clone --depth 1 https://github.com/esirplayground/LingTiGameAcc
+        git clone --depth 1 https://github.com/esirplayground/luci-app-LingTiGameAcc
 
     - name: 删除多余文件
       run: |
