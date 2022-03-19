@@ -22,7 +22,7 @@ env:
   VERSION: 21.02.2
 
 jobs:
-  compile-x86:
+  compile-x86-64:
     runs-on: Ubuntu-20.04
 
     steps:
