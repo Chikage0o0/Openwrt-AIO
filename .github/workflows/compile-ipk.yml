@@ -15,10 +15,6 @@ on:
   workflow_dispatch:
 
 env:
-  DIFF_CONFIG_FILE: patch/${{matrix.target}}.config
-  REMOTE_PATH: drive:Public/Openwrt/Package/${{matrix.target}}/
-  LOCAL_PATH: /workdir/bin/packages/${{matrix.target}}/custom/
-  TARGET: ${{matrix.target}}
   VERSION: 21.02.2
 
 jobs:
@@ -46,15 +42,15 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         mkdir -p /workdir/bin/ $$ mkdir -p /workdir/error/
-        rclone copy $REMOTE_PATH $LOCAL_PATH || true
+        rclone copy $REMOTE_PATH/${{matrix.target}}/ /workdir/bin/packages/${{matrix.target}}/custom/ || true
   
     - name: 编译
       run: |
         docker run --rm -v /workdir/bin/:/home/build/openwrt/bin/  \
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
-            -v $GITHUB_WORKSPACE/$DIFF_CONFIG_FILE:/home/build/openwrt/custom.config \
+            -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
             -v /workdir/error/:/home/build/openwrt/error/  \
-             openwrtorg/sdk:$TARGET-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
+             openwrtorg/sdk:${{matrix.target}}-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
 
     - name: 如果出现失败上传日志到artifact
       uses: actions/upload-artifact@v3
@@ -64,6 +60,6 @@ jobs:
         
     - name: 上传至目标存储
       run: |
-        rclone delete $REMOTE_PATH
-        rclone copy $LOCAL_PATH $REMOTE_PATH
+        rclone delete $REMOTE_PATH || true
+        rclone copy /workdir/bin/packages/${{matrix.target}}/custom/ $REMOTE_PATH/${{matrix.target}}/
     
