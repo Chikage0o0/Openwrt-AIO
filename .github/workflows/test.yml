@@ -10,14 +10,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  load_matrix:
     runs-on: Ubuntu-20.04
-
-    strategy: 
-      fail-fast: false   
-      matrix: 
-        node: [10, 12, 14]
-
+    #outputs:
+    # matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - id: set-matrix
-        run: echo ${{ toJSON(matrix) }
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: JSON to variables
+        uses: antifree/json-to-variables@v1.0.1
+        with:
+          filename: "patch/config.json"
+      - name: Show output
+        run: echo " ${{ env.json_targets }}"
