@@ -19,27 +19,38 @@ ipk_list=($(git log  --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | s
 cd /home/build/openwrt
 
 # 编译
+make package/feeds/luci/luci-base/compile
 for ipk in ${ipk_list[@]}
 {
   echo "start compile $ipk"
-  make package/$ipk/{clean,compile} -j2   || make package/$ipk/{clean,compile} V=s >> error/error_$ipk.log 2>&1 
+  make package/$ipk/compile -j2   || make package/$ipk/compile V=s >> error/error_$ipk.log 2>&1 
 }
-
+target_path=`find bin/packages -name custom`
 # 移动Kmod
-mvkmod(){
+mvKmod(){
   if [ `find bin/targets -name $1` ];then
-    if [ `find bin/packages -name $1` ];then
-      for ipk in `find bin/packages -name $1`; do
-        rm -f $ipk
-      done
-    fi
     for ipk in `find bin/targets -name $1`; do
-      cp $ipk `find bin/packages -name custom`
+      mv $ipk `find bin/packages -name custom`
     done
   fi
 }
 
 mvkmod "kmod-r8125*.ipk"
 
+# 删除旧的ipk
+RmOldIpk(){
+  if [ `find /home/build/packages/ -name $1` ];then
+    for ipk in `find /home/build/packages/ -name $1`; do
+      rm -f $ipk
+    done
+  fi
+}
+for newipk in `ls $target_path`; do
+  RmOldIpk ${ipk%%_*}
+done
+
+# 生成索引
+mv /home/build/packages/* $target_path
 make package/index
+mv $target_path/* /home/build/packages
 

@@ -23,11 +23,7 @@ jobs:
     strategy: 
       fail-fast: false   
       matrix:
-        include:
-         - target: x86-64
-           target_path: x86_64
-         - target: ramips-mt7621
-           target_path: mipsel_24kc
+        target: [x86-64,ramips-mt7621]
 
     steps:
     - name: Checkout
@@ -45,13 +41,13 @@ jobs:
       run: |
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-        mkdir -p /workdir/bin/ $$ mkdir -p /workdir/error/
-        rclone copy $REMOTE_PATH/${{matrix.target_path}} /workdir/bin/packages/${{matrix.target_path}}/custom/ || true
+        mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
+        rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
   
     - name: 编译
       id: compile
       run: |
-        docker run --rm -v /workdir/bin/:/home/build/openwrt/bin/  \
+        docker run --rm -v /workdir/packages/:/home/build/packages/  \
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
             -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
             -v /workdir/error/:/home/build/openwrt/error/  \
@@ -76,6 +72,6 @@ jobs:
         
     - name: 上传至目标存储
       run: |
-        rclone delete $REMOTE_PATH/${{matrix.target_path}}/ || true
-        rclone copy /workdir/bin/packages/${{matrix.target_path}}/custom/ $REMOTE_PATH/${{matrix.target_path}}/
+        rclone delete $REMOTE_PATH/${{matrix.target}}/ || true
+        rclone copy /workdir/packages/ $REMOTE_PATH/${{matrix.target}}/
     
