@@ -70,6 +70,8 @@ jobs:
         else
           echo "compile_error=true" >> $GITHUB_ENV
         fi
+        sudo chown $USER:$GROUPS /workdir
+        sudo chown $USER:$GROUPS $GITHUB_WORKSPACE
 
     - name: 如果出现失败上传Artifact
       if: ${{ env.compile_error }} 
