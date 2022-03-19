@@ -20,12 +20,11 @@ cd /home/build/openwrt
 
 # 编译
 make package/feeds/luci/luci-base/compile
-# for ipk in ${ipk_list[@]}
-# {
-#   echo "start compile $ipk"
-#   make package/feeds/custom/$ipk/compile -j2   || make package/$ipk/compile V=s >> error/error_$ipk.log 2>&1 
-# }
-make package/feeds/custom/brook/compile
+for ipk in ${ipk_list[@]}
+{
+  echo "start compile $ipk"
+  make package/feeds/custom/$ipk/compile -j2   || make package/$ipk/compile V=s >> error/error_$ipk.log 2>&1 
+}
 target_path=`find bin/packages -name custom`
 # 移动Kmod
 function mvKmod(){
