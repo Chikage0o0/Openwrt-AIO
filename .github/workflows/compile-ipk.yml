@@ -14,6 +14,7 @@ on:
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
   VERSION: 21.02.2
+  USE_TG: false
   
 jobs:
   compile-ipk:
@@ -58,12 +59,20 @@ jobs:
 
         echo "::set-output name=error::`ls -A /workdir/error/`"
 
-    - name: 如果出现失败发送通知
+    - name: 如果出现失败上传Artifact
       if: ${{ steps.compile.outputs.error }} != ""
       uses: actions/upload-artifact@v3
       with:
         name: ${{matrix.target}}-error
         path: /workdir/error/
+    
+    - name: 如果出现失败通知TG
+      if: ${{ steps.compile.outputs.error }} != "" && $USE_TG
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: some errors in compile
         
     - name: 上传至目标存储
       run: |
