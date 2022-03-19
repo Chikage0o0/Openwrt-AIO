@@ -67,7 +67,7 @@ jobs:
         # 主题
         svn export https://github.com/jerrykuku/luci-theme-argon/trunk ./luci-theme-argon
         svn export https://github.com/jerrykuku/luci-app-argon-config/trunk ./luci-app-argon-config
-        svn export https://github.com/thinktip/luci-theme-neobird/trunk ./luci-theme-neobird
+        # svn export https://github.com/thinktip/luci-theme-neobird/trunk ./luci-theme-neobird 不支持Openwrt最新版
         svn export https://github.com/Chikage0o0/luci-theme-infinityfreedom/trunk/luci-theme-infinityfreedom
 
 
