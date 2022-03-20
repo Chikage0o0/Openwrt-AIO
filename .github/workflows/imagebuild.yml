@@ -28,7 +28,7 @@ jobs:
     strategy: 
       fail-fast: false   
       matrix:
-        target: [x86-64,ramips-mt7621]
+        target: [x86-64]
 
     steps:
     - name: Checkout
@@ -49,9 +49,11 @@ jobs:
         rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
         echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
         docker run -dt --name imagebuilder -v /workdir/packages/:/home/build/openwrt/packages/  \
-            -v $GITHUB_WORKSPACE/diy/config/${{matrix.target}}.config:/home/build/openwrt/custom.config \
+            -v $GITHUB_WORKSPACE/diy/sh/target/${{matrix.target}}.sh:/home/build/openwrt/target.sh \
+            -v $GITHUB_WORKSPACE/diy/sh/imagebuild.sh:/home/build/openwrt/imagebuild.sh \
+            -v $GITHUB_WORKSPACE/diy/files/${{matrix.target}}/:/home/build/openwrt/files/  \
             -v $GITHUB_WORKSPACE/diy/tool/:/home/build/openwrt/tool/ \
-            -v /workdir/error/:/home/build/openwrt/error/  \
+            -v /workdir/bin/target/:/home/build/openwrt/bin/target/  \
              openwrtorg/imagebuilder:${{matrix.target}}-$VERSION
         
     - name: SSH connection to Actions
@@ -60,4 +62,4 @@ jobs:
 
     - name: 编译
       if: github.event.inputs.ssh != 'true'
-      run: docker exec  imagebuilder /bin/bash /home/build/custom-feed/sh/imagebuild.sh
+      run: docker exec  imagebuilder /bin/bash /home/build/openwrt/imagebuild.sh
