@@ -34,7 +34,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
 
-    steps:
     - name: 配置RCLONE
       uses: NiceLabs/rclone-action@master
       with:
@@ -49,8 +48,7 @@ jobs:
         mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
         rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
         echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
-        docker run -dt --name sdk -v /workdir/packages/:/home/build/packages/  \
-            -v /workdir/key-build:/home/build/openwrt/key-build  \
+        docker run -dt --name imagebuild -v /workdir/packages/:/home/build/packages/  \
             -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
             -v $GITHUB_WORKSPACE/patch/public.key:/home/build/openwrt/public.key \
             -v /workdir/error/:/home/build/openwrt/error/  \
@@ -62,4 +60,4 @@ jobs:
 
     - name: 编译
       if: github.event.inputs.ssh != 'true'
-      run: docker exec  sdk /bin/bash /home/build/custom-feed/patch/imagebuild.sh
+      run: docker exec  imagebuild /bin/bash /home/build/custom-feed/sh/imagebuild.sh
