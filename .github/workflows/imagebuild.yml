@@ -48,11 +48,11 @@ jobs:
         mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
         rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
         echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
-        docker run -dt --name imagebuild -v /workdir/packages/:/home/build/packages/  \
+        docker run -dt --name imagebuilder -v /workdir/packages/:/home/build/packages/  \
             -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
             -v $GITHUB_WORKSPACE/patch/public.key:/home/build/openwrt/public.key \
             -v /workdir/error/:/home/build/openwrt/error/  \
-             openwrtorg/imagebuild:${{matrix.target}}-$VERSION
+             openwrtorg/imagebuilder:${{matrix.target}}-$VERSION
         
     - name: SSH connection to Actions
       if: github.event.inputs.ssh == 'true'
@@ -60,4 +60,4 @@ jobs:
 
     - name: 编译
       if: github.event.inputs.ssh != 'true'
-      run: docker exec  imagebuild /bin/bash /home/build/custom-feed/sh/imagebuild.sh
+      run: docker exec  imagebuilder /bin/bash /home/build/custom-feed/sh/imagebuild.sh
