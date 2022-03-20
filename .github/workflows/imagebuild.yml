@@ -53,7 +53,7 @@ jobs:
             -v $GITHUB_WORKSPACE/diy/sh/imagebuild.sh:/home/build/openwrt/imagebuild.sh \
             -v $GITHUB_WORKSPACE/diy/files/${{matrix.target}}/:/home/build/openwrt/files/  \
             -v $GITHUB_WORKSPACE/diy/tool/:/home/build/openwrt/tool/ \
-            -v /workdir/bin/target/:/home/build/openwrt/bin/target/  \
+            -v /workdir/bin/target/:/home/build/openwrt/bin/targets/  \
              openwrtorg/imagebuilder:${{matrix.target}}-$VERSION
         
     - name: SSH connection to Actions
