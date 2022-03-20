@@ -10,6 +10,11 @@ on:
   repository_dispatch:
     types: [Compile-IPK]
   workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
 
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
@@ -28,6 +33,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
+      with:
+        fetch-depth: 2
 
     - name: 配置RCLONE
       uses: NiceLabs/rclone-action@master
@@ -43,20 +50,25 @@ jobs:
         sudo chown $USER:$GROUPS /workdir
         mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
         rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
-
-    - name: 转储签名
-      run: echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
-
-    - name: 编译
-      id: compile
-      run: |
-        docker run --rm -v /workdir/packages/:/home/build/packages/  \
+        echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
+        docker run -dt --name sdk -v /workdir/packages/:/home/build/packages/  \
             -v /workdir/key-build:/home/build/openwrt/key-build  \
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
             -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
             -v /workdir/error/:/home/build/openwrt/error/  \
-             openwrtorg/sdk:${{matrix.target}}-$VERSION /bin/bash /home/build/custom-feed/patch/build.sh
+             openwrtorg/sdk:${{matrix.target}}-$VERSION
 
+    - name: SSH connection to Actions
+      if: github.event.inputs.ssh == 'true'
+      uses: mxschmitt/action-tmate@v1
+
+    - name: 编译
+      if: github.event.inputs.ssh != 'true'
+      run: docker exec  sdk /bin/bash /home/build/custom-feed/patch/build.sh
+
+    - name: 编译完成后清理
+      run: |
+        docker rm -f sdk
         if [`ls -A /workdir/error/` == ""] ;then
           echo "compile_error=false" >> $GITHUB_ENV
         else
