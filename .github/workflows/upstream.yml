@@ -8,6 +8,8 @@
 name: Merge-upstream
 on:
   push:
+    branches:
+      - main
     paths:
       - '.github/workflows/upstream.yml'
       - '.gitignore'
