@@ -76,6 +76,9 @@ jobs:
         git clone --depth 1 https://github.com/esirplayground/LingTiGameAcc
         git clone --depth 1 https://github.com/esirplayground/luci-app-LingTiGameAcc
 
+        # Zerotier的面板
+        git clone --depth 1 https://github.com/rufengsuixing/luci-app-zerotier
+
     - name: 删除多余文件
       run: |
         rm -rf .svn
