@@ -48,9 +48,9 @@ jobs:
         mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
         rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
         echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
-        docker run -dt --name imagebuilder -v /workdir/packages/:/home/build/packages/  \
-            -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
-            -v $GITHUB_WORKSPACE/patch/public.key:/home/build/openwrt/public.key \
+        docker run -dt --name imagebuilder -v /workdir/packages/:/home/build/openwrt/packages/custom/  \
+            -v $GITHUB_WORKSPACE/diy/config/${{matrix.target}}.config:/home/build/openwrt/custom.config \
+            -v $GITHUB_WORKSPACE/diy/tool/:/home/build/openwrt/tool/ \
             -v /workdir/error/:/home/build/openwrt/error/  \
              openwrtorg/imagebuilder:${{matrix.target}}-$VERSION
         
