@@ -28,7 +28,7 @@ jobs:
     strategy: 
       fail-fast: false   
       matrix:
-        target: [x86-64]
+        target: [x86-64,ramips-mt7621]
 
     steps:
     - name: Checkout
