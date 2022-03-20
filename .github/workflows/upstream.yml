@@ -54,6 +54,9 @@ jobs:
         # passwall
         svn export https://github.com/xiaorouji/openwrt-passwall/branches/luci/luci-app-passwall
 
+        # openclash
+        svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
+
         # passwall以及ssr-plus的依赖
         git clone --depth 1 -b packages https://github.com/xiaorouji/openwrt-passwall
         mv -n `find openwrt-passwall/* -maxdepth 0 -type d` ./ && rm -rf openwrt-passwall

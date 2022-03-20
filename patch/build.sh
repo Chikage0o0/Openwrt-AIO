@@ -15,7 +15,7 @@ make defconfig >> /dev/null 2>&1
 
 # 获取编译的包列表
 cd /home/build/custom-feed
-ipk_list=($(git log  --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | sort | uniq))
+ipk_list=($(git log  -1 --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | sort | uniq))
 cd /home/build/openwrt
 
 # 编译
