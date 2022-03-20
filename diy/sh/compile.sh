@@ -15,7 +15,7 @@ make defconfig >> /dev/null 2>&1
 
 # 获取编译的包列表
 cd /home/build/custom-feed
-ipk_list=($(git log  -1 --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | sort | uniq))
+ipk_list=($(git log   --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | sort | uniq))
 cd /home/build/openwrt
 
 # 编译
@@ -28,14 +28,14 @@ for ipk in ${ipk_list[@]}
 target_path=`find bin/packages -name custom`
 
 # 解决单编译kmod 导致package不存在问题
-if [ ${target_path} == "" ];then
+if [[ ${target_path} == "" ]];then
   make package/feeds/custom/tcping/compile -j2
   target_path=`find bin/packages -name custom`
 fi
 
 # 移动Kmod
 function mvKmod(){
-  if [ `find bin/targets -name $1` ];then
+  if [[ `find bin/targets -name $1` ]];then
     for ipk in `find bin/targets -name $1`; do
       mv $ipk `find bin/packages -name custom`
     done
@@ -45,15 +45,8 @@ function mvKmod(){
 mvKmod "kmod-r8125*.ipk"
 
 # 删除旧的ipk
-function RmOldIpk(){
-  if [ `find /home/build/packages/ -name $1` ];then
-    for ipk in `find /home/build/packages/ -name $1`; do
-      rm -f $ipk
-    done
-  fi
-}
 for newipk in `ls $target_path`; do
-  RmOldIpk ${newipk%%_*}
+  rm -f /home/build/packages/${newipk%%_*}_*
 done
 
 # 生成索引
