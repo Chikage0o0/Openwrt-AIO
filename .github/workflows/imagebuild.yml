@@ -70,9 +70,9 @@ jobs:
         sudo chown -R $USER:$GROUPS /workdir
         sudo chown -R $USER:$GROUPS $GITHUB_WORKSPACE
         if [[ `find /workdir/bin/target/ -name *.img.gz` ]] ;then
-          echo "image_build=false" >> $GITHUB_ENV
-        else
           echo "image_build=true" >> $GITHUB_ENV
+        else
+          echo "image_build=false" >> $GITHUB_ENV
         fi
 
     - name: 移动编译完成的固件
