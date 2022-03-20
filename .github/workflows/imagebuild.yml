@@ -69,13 +69,14 @@ jobs:
         docker rm -f imagebuilder
         sudo chown -R $USER:$GROUPS /workdir
         sudo chown -R $USER:$GROUPS $GITHUB_WORKSPACE
-        if [[ `find /workdir/bin/target/ -name *.img.gz` ]] ;then
+        if [[ `find /workdir/bin/target/ -name *.img.gz -or  -name *.bin` ]] ;then
           echo "image_build=true" >> $GITHUB_ENV
         else
           echo "image_build=false" >> $GITHUB_ENV
         fi
 
     - name: 移动编译完成的固件
+      if: env.image_build == 'true'
       run: |
         mkdir /workdir/image
         for img in `find /workdir/bin/target/ -name *.img.gz -or  -name *.bin`; do
