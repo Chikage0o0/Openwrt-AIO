@@ -10,5 +10,15 @@ uci commit system
 uci set luci.main.lang='zh_cn'
 uci commit luci
 
+uci set wireless.@wifi-device[0].disabled='0'
+uci set wireless.@wifi-iface[0].disabled='0'
+uci set wireless.@wifi-device[1].disabled='0'
+uci set wireless.@wifi-iface[1].disabled='0'
+uci set wireless.@wifi-device[0].country='CN'
+uci set wireless.@wifi-device[0].channel='auto'
+uci set wireless.@wifi-device[1].country='CN'
+uci set wireless.@wifi-device[1].channel='auto'
+uci commit wireless
+
 sed -i 's/downloads.openwrt.org/mirrors.ustc.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
 echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/ramips-mt7621' >> /etc/opkg/customfeeds.conf
