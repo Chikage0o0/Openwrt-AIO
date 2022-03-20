@@ -1,0 +1,65 @@
+#
+# This is free software, lisence use MIT.
+# 
+# 
+# <https://github.com/Chikage0o0/openwrt-packages>
+#
+
+name: Image-Build
+on:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+  schedule:
+    - cron: 0 0 1 * *
+  
+env:
+  REMOTE_PATH: drive:Public/Openwrt/Package
+  VERSION: 21.02.2
+  USE_TG: false
+
+jobs:
+  image-build:
+    runs-on: Ubuntu-20.04
+
+    strategy: 
+      fail-fast: false   
+      matrix:
+        target: [x86-64,ramips-mt7621]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    steps:
+    - name: 配置RCLONE
+      uses: NiceLabs/rclone-action@master
+      with:
+        github-token: ${{ secrets.SECRET_TOKEN }}
+        config: ${{ secrets.RCLONE_CONFIG }}
+        config-secret-name: RCLONE_CONFIG
+
+    - name: 准备环境
+      run: |
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+        mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
+        rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
+        echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
+        docker run -dt --name sdk -v /workdir/packages/:/home/build/packages/  \
+            -v /workdir/key-build:/home/build/openwrt/key-build  \
+            -v $GITHUB_WORKSPACE/patch/${{matrix.target}}.config:/home/build/openwrt/custom.config \
+            -v $GITHUB_WORKSPACE/patch/public.key:/home/build/openwrt/public.key \
+            -v /workdir/error/:/home/build/openwrt/error/  \
+             openwrtorg/imagebuild:${{matrix.target}}-$VERSION
+        
+    - name: SSH connection to Actions
+      if: github.event.inputs.ssh == 'true'
+      uses: mxschmitt/action-tmate@v1
+
+    - name: 编译
+      if: github.event.inputs.ssh != 'true'
+      run: docker exec  sdk /bin/bash /home/build/custom-feed/patch/imagebuild.sh

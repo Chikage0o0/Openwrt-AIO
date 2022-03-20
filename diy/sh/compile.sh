@@ -28,7 +28,7 @@ for ipk in ${ipk_list[@]}
 target_path=`find bin/packages -name custom`
 
 # 解决单编译kmod 导致package不存在问题
-if [$target_path == ""];then
+if [ ${target_path} == "" ];then
   make package/feeds/custom/tcping/compile -j2
   target_path=`find bin/packages -name custom`
 fi
