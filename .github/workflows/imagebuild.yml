@@ -78,8 +78,8 @@ jobs:
     - name: 移动编译完成的固件
       run: |
         mkdir /workdir/image
-        for ipk in `find /workdir/bin/target/ -name *.img.gz`; do
-          mv $ipk /workdir/image
+        for img in `find /workdir/bin/target/ -name *.img.gz -or  -name *.bin`; do
+          mv $img /workdir/image
         done
 
     - name: 生成Release信息
