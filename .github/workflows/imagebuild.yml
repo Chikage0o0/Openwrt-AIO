@@ -95,7 +95,7 @@ jobs:
         name: Openwrt ${{env.VERSION}}_${{matrix.target}}
         allowUpdates: true
         body: ${{ steps.tag.outputs.release_body }}
-        tag: Openwrt-${{env.VERSION}}
+        tag: Openwrt_${{env.VERSION}}_${{matrix.target}}
         commit: main
         replacesArtifacts: true
         token: ${{ secrets.SECRET_TOKEN }}
