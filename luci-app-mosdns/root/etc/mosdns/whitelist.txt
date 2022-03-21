@@ -1,4 +1,0 @@
-example.example
-tracking.miui.com
-tracking.intl.miui.com
-stat.xiaomi.com
