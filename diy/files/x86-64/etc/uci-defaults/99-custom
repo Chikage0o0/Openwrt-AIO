@@ -1,3 +1,4 @@
+#set lan ip
 uci set network.lan.ipaddr='192.168.123.1'
 uci commit network
 
@@ -7,6 +8,7 @@ uci set system.@system[0].cronloglevel='8'
 uci set system.@system[0].conloglevel='7'
 uci commit system
 
+#set luci default language
 uci set luci.main.lang='zh_cn'
 uci commit luci
 
@@ -18,5 +20,6 @@ uci set passwall.@global[0].tcp_proxy_mode='gfwlist'
 uci set passwall.@global[0].udp_proxy_mode='disable'
 uci commit passwall
 
+#edit feeds
 sed -i 's/downloads.openwrt.org/mirrors.ustc.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
 echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/x86-64' >> /etc/opkg/customfeeds.conf

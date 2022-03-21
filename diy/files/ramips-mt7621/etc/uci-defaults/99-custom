@@ -1,3 +1,4 @@
+#set lan ip
 uci set network.lan.ipaddr='192.168.10.1'
 uci commit network
 
@@ -7,9 +8,11 @@ uci set system.@system[0].cronloglevel='8'
 uci set system.@system[0].conloglevel='7'
 uci commit system
 
+#set luci default language
 uci set luci.main.lang='zh_cn'
 uci commit luci
 
+#enable wlan
 uci set wireless.@wifi-device[0].disabled='0'
 uci set wireless.@wifi-iface[0].disabled='0'
 uci set wireless.@wifi-device[1].disabled='0'
@@ -20,5 +23,11 @@ uci set wireless.@wifi-device[1].country='CN'
 uci set wireless.@wifi-device[1].channel='auto'
 uci commit wireless
 
+#enable flow offloading
+uci set firewall.@defaults[0].flow_offloading='1'
+uci set firewall.@defaults[0].flow_offloading_hw='1'
+uci commit firewall
+
+#edit feeds
 sed -i 's/downloads.openwrt.org/mirrors.ustc.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
 echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/ramips-mt7621' >> /etc/opkg/customfeeds.conf
