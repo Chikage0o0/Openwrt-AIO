@@ -1,5 +1,7 @@
+#if upgrage then exit
+[ -e /etc/config/network ] && exit 0
 #set lan ip
-uci set network.lan.ipaddr='192.168.123.1'
+uci set network.lan.ipaddr='192.168.10.1'
 uci commit network
 
 uci set system.@system[0].zonename='Asia/Shanghai'
