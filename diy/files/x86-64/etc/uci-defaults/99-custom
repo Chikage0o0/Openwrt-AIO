@@ -1,5 +1,5 @@
 #!/bin/sh
-[ "$(uci -q get system.@system[0].init)" == "" ] && exit 0
+[ "$(uci -q get system.@system[0].init)" != "" ] && exit 0
 #set lan ip
 uci set network.lan.ipaddr='192.168.10.1'
 uci commit network
