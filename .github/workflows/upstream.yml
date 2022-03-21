@@ -49,8 +49,8 @@ jobs:
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/uugamebooster
 
         # vlmcsd
-        svn export https://github.com/siwind/luci-app-vlmcsd/trunk ./luci-app-vlmcsd
-        svn export https://github.com/siwind/openwrt-vlmcsd/trunk ./openwrt-vlmcsd
+        svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-vlmcsd 
+        svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/vlmcsd 
 
         # ssr-plus
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-ssr-plus
