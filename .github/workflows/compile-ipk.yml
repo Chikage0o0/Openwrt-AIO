@@ -59,7 +59,7 @@ jobs:
             -v /workdir/key-build:/home/build/openwrt/key-build  \
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
             -v $GITHUB_WORKSPACE/diy/config/${{matrix.target}}.config:/home/build/openwrt/custom.config \
-            -v /workdir/error/:/home/build/openwrt/error/   -e rebuild=${{ github.event.inputs.rebuild }}\
+            -v /workdir/error/:/home/build/openwrt/error/  \
              openwrtorg/sdk:${{matrix.target}}-$VERSION
 
     - name: SSH connection to Actions
@@ -68,7 +68,9 @@ jobs:
 
     - name: 编译
       if: github.event.inputs.ssh != 'true'
-      run: docker exec -t sdk /bin/bash /home/build/custom-feed/diy/sh/compile.sh
+      run: |
+        rebuild=${{ github.event.inputs.rebuild }}
+        docker exec sdk /bin/bash /home/build/custom-feed/diy/sh/compile.sh
 
     - name: 编译完成后清理
       run: |
