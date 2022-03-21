@@ -68,7 +68,7 @@ jobs:
 
     - name: 编译
       if: github.event.inputs.ssh != 'true'
-      run: docker exec  sdk /bin/bash /home/build/custom-feed/diy/sh/compile.sh
+      run: docker exec -t sdk /bin/bash /home/build/custom-feed/diy/sh/compile.sh
 
     - name: 编译完成后清理
       run: |
