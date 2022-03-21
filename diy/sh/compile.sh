@@ -6,7 +6,7 @@ sudo apt-get install upx git -y >> /dev/null 2>&1
 ln -s /usr/bin/upx staging_dir/host/bin/upx
 
 # 添加并安装源
-echo "src-link custom /home/build/custom-feed" >> feeds.conf.default
+echo "src-link custom /home/build/custom-feed/feeds" >> feeds.conf.default
 ./scripts/feeds update -a >> /dev/null 2>&1 
 ./scripts/feeds install -p custom -a >> /dev/null 2>&1 
 
@@ -15,7 +15,7 @@ make defconfig >> /dev/null 2>&1
 
 # 获取编译的包列表
 cd /home/build/custom-feed
-ipk_list=($(git log   --name-status | grep -oP '(?<=\s)[-\w]+(?<!patch)(?=/)' | sort | uniq))
+ipk_list=($(git log -1  --name-status | grep -oP '(?<=feeds/)[-\w]+(?=/)' | sort | uniq))
 cd /home/build/openwrt
 
 # 编译

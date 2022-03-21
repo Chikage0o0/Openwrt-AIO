@@ -35,9 +35,11 @@ jobs:
 
     - name: 同步上游
       run: |
-        # 删除git缓存以及除了diy以外的文件夹
+        
+        # 删除git缓存以及feeds的文件夹
         git rm -r --cache * >/dev/null 2>&1 &
-        rm -rf `find ./* -maxdepth 0 -type d ! -name "diy"` >/dev/null 2>&1
+        rm -rf ./feeds >/dev/null 2>&1
+        mkdir feeds && cd feeds
 
         # miniupnpd支持强行映射
         svn export https://github.com/hzyitc/miniupnpd-openwrt-ptpt52-mod/trunk/miniupnpd
@@ -83,16 +85,16 @@ jobs:
 
     - name: 删除多余文件
       run: |
-        rm -rf .svn
-        rm -rf ./*/.git
-        rm -rf ./*/.github
-        rm -rf ./*/.svn
-        rm -rf ./*/README.md
-        rm -rf ./*/LICENSE
+        rm -rf ./feeds/.svn
+        rm -rf ./feeds/*/.git
+        rm -rf ./feeds/*/.github
+        rm -rf ./feeds/*/.svn
+        rm -rf ./feeds/*/README.md
+        rm -rf ./feeds/*/LICENSE
 
     - name: 解决冲突
       run: |
-        sed -i 's#../../luci.mk#$(TOPDIR)/feeds/luci/luci.mk#g' */Makefile
+        sed -i 's#../../luci.mk#$(TOPDIR)/feeds/luci/luci.mk#g' ./feeds/*/Makefile
           
     - name: 提交
       run: |
