@@ -83,24 +83,17 @@ jobs:
           mv $img /workdir/image
         done
 
-    - name: 生成Release信息
-      id: tag
-      if: env.image_build == 'true'
-      run: |
-        echo "::set-output name=release_tag::${{matrix.target}}_$(date +"%Y.%m.%d-%H%M")"
-        touch release.txt
-        echo "本次固件编译于$(date +"%Y.%m.%d-%H%M")" >> release.txt
-
     - name: 上传固件到Release
-      uses: softprops/action-gh-release@v1
-      if: env.image_build == 'true'
-      env:
-        GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: ${{ steps.tag.outputs.release_tag }}
-        body_path: release.txt
-        files: /workdir/image/*
-    
+        name: Openwrt ${{env.VERSION}}_${{matrix.target}}
+        allowUpdates: true
+        body: 本次固件编译于$(date +"%Y.%m.%d")
+        tag: Openwrt-${{env.VERSION}}
+        commit: main
+        replacesArtifacts: true
+        token: ${{ secrets.SECRET_TOKEN }}
+        artifacts: /workdir/image/*
 
     
     
