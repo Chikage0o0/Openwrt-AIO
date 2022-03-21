@@ -74,7 +74,7 @@ jobs:
         svn export https://github.com/jerrykuku/luci-theme-argon/trunk ./luci-theme-argon
         svn export https://github.com/jerrykuku/luci-app-argon-config/trunk ./luci-app-argon-config
         # svn export https://github.com/thinktip/luci-theme-neobird/trunk ./luci-theme-neobird 不支持Openwrt最新版
-        svn export https://github.com/Chikage0o0/luci-theme-infinityfreedom/trunk/luci-theme-infinityfreedom
+        # svn export https://github.com/Chikage0o0/luci-theme-infinityfreedom/trunk/luci-theme-infinityfreedom 不支持Openwrt最新版
 
         # 灵缇加速器
         git clone --depth 1 https://github.com/esirplayground/LingTiGameAcc
@@ -82,6 +82,9 @@ jobs:
 
         # Zerotier的面板
         git clone --depth 1 https://github.com/rufengsuixing/luci-app-zerotier
+        
+        # Realtek 8125 驱动
+        svn export https://github.com/csrutil/OpenWrtDrivers/trunk/drivers/r8125
 
     - name: 删除多余文件
       run: |
