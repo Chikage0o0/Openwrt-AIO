@@ -15,7 +15,11 @@ make defconfig >> /dev/null 2>&1
 
 # 获取编译的包列表
 cd /home/build/custom-feed
-ipk_list=($(git log -1  --name-status | grep -oP '(?<=feeds/)[-\w]+(?=/)' | sort | uniq))
+if [[ $rebuild == "true" ]];then
+  ipk_list=($(git log --name-status | grep -oP '(?<=feeds/)[-\w]+(?=/)' | sort | uniq))
+else
+  ipk_list=($(git log -1 --name-status | grep -oP '(?<=feeds/)[-\w]+(?=/)' | sort | uniq))
+fi
 cd /home/build/openwrt
 
 # 编译
@@ -45,11 +49,17 @@ function mvKmod(){
 mvKmod "kmod-r8125*.ipk"
 
 # 删除旧的ipk
-for newipk in `ls $target_path`; do
-  rm -f /home/build/packages/${newipk%%_*}_*
-done
+if [[ $rebuild == "true" ]];then
+  rm -rf /home/build/packages/*
+else
+  for newipk in `ls $target_path`; do
+    rm -f /home/build/packages/${newipk%%_*}_*
+  done
+fi
+
 
 # 生成索引
+mkdir -p $target_path
 mv /home/build/packages/* $target_path
 make package/index >> /dev/null 2>&1 
 mv $target_path/* /home/build/packages

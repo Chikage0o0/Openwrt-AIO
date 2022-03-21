@@ -15,6 +15,10 @@ on:
         description: 'SSH connection to Actions'
         required: false
         default: 'false'
+      rebuild:
+        description: 'if set the rebuild args with true will build all packages'
+        required: false
+        default: 'false'
 
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
@@ -55,7 +59,7 @@ jobs:
             -v /workdir/key-build:/home/build/openwrt/key-build  \
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
             -v $GITHUB_WORKSPACE/diy/config/${{matrix.target}}.config:/home/build/openwrt/custom.config \
-            -v /workdir/error/:/home/build/openwrt/error/  \
+            -v /workdir/error/:/home/build/openwrt/error/   -e rebuild=${{ github.event.inputs.ssh }}\
              openwrtorg/sdk:${{matrix.target}}-$VERSION
 
     - name: SSH connection to Actions
