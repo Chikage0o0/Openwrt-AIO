@@ -1,5 +1,5 @@
-#if upgrage then exit
-[ -e /etc/config/network ] && exit 0
+#!/bin/sh
+[ "$(uci -q get system.@system[0].init)" == "" ] && exit 0
 #set lan ip
 uci set network.lan.ipaddr='192.168.10.1'
 uci commit network
@@ -8,6 +8,7 @@ uci set system.@system[0].zonename='Asia/Shanghai'
 uci set system.@system[0].timezone='CST-8'
 uci set system.@system[0].cronloglevel='8'
 uci set system.@system[0].conloglevel='7'
+uci set system.@system[0].init='initiated'
 uci commit system
 
 #set luci default language
