@@ -57,9 +57,7 @@ else
   done
 fi
 
-
 # 生成索引
-mkdir -p $target_path
 mv /home/build/packages/* $target_path
 make package/index >> /dev/null 2>&1 
 mv $target_path/* /home/build/packages
