@@ -15,7 +15,7 @@ make defconfig >> /dev/null 2>&1
 
 # 获取编译的包列表
 cd /home/build/custom-feed
-if [[ $rebuild == "true" ]];then
+if [[ $1 == "true" ]];then
   ipk_list=($(git log --name-status | grep -oP '(?<=feeds/)[-\w]+(?=/)' | sort | uniq))
 else
   ipk_list=($(git log -1 --name-status | grep -oP '(?<=feeds/)[-\w]+(?=/)' | sort | uniq))
@@ -49,7 +49,7 @@ function mvKmod(){
 mvKmod "kmod-r8125*.ipk"
 
 # 删除旧的ipk
-if [[ $rebuild == "true" ]];then
+if [[ $1 == "true" ]];then
   rm -rf /home/build/packages/*
 else
   for newipk in `ls $target_path`; do
