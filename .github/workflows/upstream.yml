@@ -83,8 +83,8 @@ jobs:
         # diskman
         svn export https://github.com/lisaac/luci-app-diskman/trunk/applications/luci-app-diskman
 
-        # Luci-app-socatg
-        git clone --depth 1 https://github.com/big-tooth/luci-app-socatg
+        # Luci-app-socat
+        svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-socat
 
         # Zerotier的面板
         git clone --depth 1 https://github.com/rufengsuixing/luci-app-zerotier
