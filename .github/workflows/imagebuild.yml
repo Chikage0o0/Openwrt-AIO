@@ -28,7 +28,7 @@ jobs:
     strategy: 
       fail-fast: false   
       matrix:
-        target: [x86-64,ramips-mt7621]
+        target: [x86-64,ramips-mt7621,rockchip-armv8]
 
     steps:
     - name: Checkout
