@@ -9,6 +9,12 @@ This repository provides regular updates to third-party software sources, compil
 目前提供的可用固件有：
  - [x86-64](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_x86-64) 加入了2.5G网卡支持以及Vmxnet3的驱动支持
  - [Youhua WR1200JS](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_ramips-mt7621)  去掉了默认的usb支持，可以在软件包中装入
+ - [Lenovo newifi D1](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_ramips-mt7621)  去掉了默认的usb支持，可以在软件包中装入
+ - [Redmi Router AC2100](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_ramips-mt7621)  
+ - [Xiaomi Router AC2100](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_ramips-mt7621)  
+ - [Phicomm k2p](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_ramips-mt7621)  
+ - [Xiaomi Router 4](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_ramips-mt7621)  
+ - [Xiaomi Router 4a Gigabit](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_ramips-mt7621)  
  - [R2S](https://github.com/Chikage0o0/Openwrt-AIO/releases/tag/Openwrt_21.02.2_rockchip-armv8)
 
 所有的固件均为无任何附加软件的纯净固件，仅对中国用户进行设置上的优化。
