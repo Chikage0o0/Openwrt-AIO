@@ -23,7 +23,7 @@ on:
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
   VERSION: 21.02.2
-  USE_TG: false
+  USE_TG: true
   
 jobs:
   compile-ipk:
