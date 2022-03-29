@@ -61,15 +61,6 @@ jobs:
         # openclash
         svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
 
-        # v2raygui
-        git clone --depth 1 -b luci2 https://github.com/kuoruan/luci-app-v2ray
-
-        # xraygui
-        git clone --depth 1 https://github.com/yichya/luci-app-xray
-
-        # trojangui
-        git clone --depth 1 https://github.com/frainzy1477/luci-app-trojan
-
         # passwall以及ssr-plus的依赖
         git clone --depth 1 -b packages https://github.com/xiaorouji/openwrt-passwall
         mv -n `find openwrt-passwall/* -maxdepth 0 -type d` ./ && rm -rf openwrt-passwall
