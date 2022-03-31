@@ -106,6 +106,9 @@ jobs:
         # 阿里云webdav
         svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt/luci-app-aliyundrive-webdav
         svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt/aliyundrive-webdav
+
+        # koolproxy去广告
+        git clone --depth 1 https://github.com/yaof2/luci-app-ikoolproxy
         
     - name: 删除多余文件
       run: |
