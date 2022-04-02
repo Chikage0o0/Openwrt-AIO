@@ -244,28 +244,6 @@ end
 o:value("DIRECT")
 o:value("REJECT")
 
-o = s:option(ListValue, "Discovery", translate("Discovery Plus"))
-o:depends("rule_name", "lhie1")
-o.rmempty = true
-for groupname in string.gmatch(groupnames, "([^'##\n']+)##") do
-  if groupname ~= nil and groupname ~= "" then
-    o:value(groupname)
-  end
-end
-o:value("DIRECT")
-o:value("REJECT")
-
-o = s:option(ListValue, "DAZN", translate("DAZN"))
-o:depends("rule_name", "lhie1")
-o.rmempty = true
-for groupname in string.gmatch(groupnames, "([^'##\n']+)##") do
-  if groupname ~= nil and groupname ~= "" then
-    o:value(groupname)
-  end
-end
-o:value("DIRECT")
-o:value("REJECT")
-
 o = s:option(ListValue, "Spotify", translate("Spotify"))
 o:depends("rule_name", "lhie1")
 o.rmempty = true

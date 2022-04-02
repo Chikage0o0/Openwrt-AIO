@@ -182,7 +182,7 @@ local function startlog()
 			if not string.find (info, "【") and not string.find (info, "】") then
    			line_trans = luci.i18n.translate(string.sub(info, 0, -1))
    		else
-   			line_trans = trans_line(info)
+   			line_trans = trans_line(line)
    		end
    	end
 	end
@@ -525,15 +525,13 @@ function action_switch_config()
 end
 
 function sub_info_get()
-	local filename, sub_url, sub_info, info, upload, download, total, expire, http_code, len
+	local filename, sub_url, sub_info, info, upload, download, total, expire, http_code
 	filename = luci.http.formvalue("filename")
 	sub_info = ""
 	if filename then
 		uci:foreach("openclash", "config_subscribe",
 			function(s)
-				if s.name == filename and s.address and string.find(s.address, "http") then
-					_, len = string.gsub(s.address, '[^\n]+', "")
-					if len and len > 1 then return end
+				if s.name == filename and s.address then
 			  	sub_url = s.address
 			  	info = luci.sys.exec(string.format("curl -sLI -m 10 -w 'http_code='%%{http_code} -H 'User-Agent: Clash' '%s'", sub_url))
 			  	if info then
@@ -1120,7 +1118,7 @@ end
 
 function action_diag_connection()
 	local addr = luci.http.formvalue("addr")
-	if addr and (datatype.hostname(addr) or datatype.ipaddr(addr)) then
+	if addr and datatype.hostname(addr) or datatype.ipaddr(addr) then
 		local cmd = string.format("/usr/share/openclash/openclash_debug_getcon.lua %s", addr)
 		luci.http.prepare_content("text/plain")
 		local util = io.popen(cmd)
@@ -1320,7 +1318,7 @@ function manual_stream_unlock_test()
 				luci.http.write(line_trans)
 				luci.http.write("\n")
 			end
-			if not process_status("openclash_streaming_unlock.lua "..type) or not process_status("openclash_streaming_unlock.lua ") then
+			if not process_status("openclash_streaming_unlock.lua") then
 				break
 			end
 		end
@@ -1332,7 +1330,7 @@ end
 
 function all_proxies_stream_test()
 	local type = luci.http.formvalue("type")
-	local cmd = string.format('/usr/share/openclash/openclash_streaming_unlock.lua "%s" "%s"', type, "all")
+	local cmd = string.format('/usr/share/openclash/openclash_streaming_unlock.lua "%s" "%s"', type, "true")
 	local line_trans
 	luci.http.prepare_content("text/plain; charset=utf-8")
 	local util = io.popen(cmd)
@@ -1348,7 +1346,7 @@ function all_proxies_stream_test()
 				luci.http.write(line_trans)
 				luci.http.write("\n")
 			end
-			if not process_status("openclash_streaming_unlock.lua "..type) or not process_status("openclash_streaming_unlock.lua ") then
+			if not process_status("openclash_streaming_unlock.lua") then
 				break
 			end
 		end
@@ -1380,7 +1378,7 @@ function trans_line(data)
 	for k = 1, #no_trans, 2 do
 		x = no_trans[k]
 		v = no_trans[k+1]
-		if x <= 21 or not string.match(string.sub(data, 0, 19), "%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d") then
+		if x <= 21 then
 			line_trans = line_trans .. luci.i18n.translate(string.sub(data, d, x - 1)) .. string.sub(data, x, v)
 			d = v + 1
 		elseif v <= string.len(data) then
@@ -1390,15 +1388,11 @@ function trans_line(data)
 	end
 	if c > string.len(data) then
 		if d == 0 then
-			if string.match(string.sub(data, 0, 19), "%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d") then
-				line_trans = string.sub(data, 0, 20) .. line_trans
-			end
+			line_trans = string.sub(data, 0, 20) .. line_trans
 		end
 	else
 		if d == 0 then
-			if string.match(string.sub(data, 0, 19), "%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d") then
-				line_trans = string.sub(data, 0, 20) .. line_trans .. luci.i18n.translate(string.sub(data, c, -1))
-			end
+			line_trans = string.sub(data, 0, 20) .. line_trans .. luci.i18n.translate(string.sub(data, c, -1))
 		else
 			line_trans = line_trans .. luci.i18n.translate(string.sub(data, c, -1))
 		end
