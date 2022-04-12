@@ -26,6 +26,10 @@ This repository provides regular updates to third-party software sources, compil
 对于其他机型的适配，如果您可以帮忙测试固件，请联系TG：[@Chikagem](https://t.me/Chikagem)
 
 ## 常用软件包
+如果安装后没有显示，请重启路由器。
+
+如果安装后是英文，请按`CTRL+F5`。
+
 |软件名|包名|
 |----|----|
 |USB支持|kmod-usb3|
