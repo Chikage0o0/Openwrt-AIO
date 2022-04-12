@@ -25,7 +25,7 @@ PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
 GO_PKG:=github.com/tobyxdd/hysteria
-GO_PKG_BUILD_PKG:=github.com/tobyxdd/hysteria/cmd
+GO_PKG_BUILD_PKG:=$(GO_PKG)/cmd
 GO_PKG_LDFLAGS:=-s -w
 GO_PKG_LDFLAGS_X:=main.appVersion=$(PKG_VERSION)
 
