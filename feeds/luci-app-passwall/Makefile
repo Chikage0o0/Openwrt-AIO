@@ -6,11 +6,10 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-passwall
-PKG_VERSION:=4.53
-PKG_RELEASE:=1
+PKG_VERSION:=4.52
+PKG_RELEASE:=3
 
 PKG_CONFIG_DEPENDS:= \
-	CONFIG_PACKAGE_$(PKG_NAME)_Transparent_Proxy \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Brook \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy \
@@ -37,6 +36,8 @@ LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 	+dns2socks +ip-full +libuci-lua +lua +luci-compat +luci-lib-jsonc \
 	+microsocks +resolveip +tcping +unzip \
+	+dnsmasq-full +ipset +ipt2socks +iptables +iptables-mod-iprange \
+	+iptables-mod-socket +iptables-mod-tproxy +kmod-ipt-nat \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Brook:brook \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG:chinadns-ng \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
@@ -61,19 +62,6 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 
 define Package/$(PKG_NAME)/config
 menu "Configuration"
-
-config PACKAGE_$(PKG_NAME)_Transparent_Proxy
-	bool "Transparent Proxy"
-	select PACKAGE_dnsmasq-full
-	select PACKAGE_ipset
-	select PACKAGE_ipt2socks
-	select PACKAGE_iptables
-	select PACKAGE_iptables-legacy
-	select PACKAGE_iptables-mod-iprange
-	select PACKAGE_iptables-mod-socket
-	select PACKAGE_iptables-mod-tproxy
-	select PACKAGE_kmod-ipt-nat
-	default y
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Brook
 	bool "Include Brook"

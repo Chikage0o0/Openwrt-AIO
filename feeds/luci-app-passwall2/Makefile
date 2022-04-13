@@ -9,7 +9,6 @@ PKG_VERSION:=1.3
 PKG_RELEASE:=4
 
 PKG_CONFIG_DEPENDS:= \
-	CONFIG_PACKAGE_$(PKG_NAME)_Transparent_Proxy \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Brook \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_IPv6_Nat \
@@ -29,7 +28,8 @@ LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 	+ip-full +libuci-lua +lua +luci-compat +luci-lib-jsonc +resolveip +tcping \
 	+xray-core +v2ray-geoip +v2ray-geosite \
-	+unzip \
+	+unzip +dnsmasq-full +ipset +iptables +iptables-mod-iprange \
+	+iptables-mod-tproxy +kmod-ipt-nat \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Brook:brook \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria:hysteria \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_IPv6_Nat:ip6tables-mod-nat \
@@ -47,18 +47,6 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 
 define Package/$(PKG_NAME)/config
 menu "Configuration"
-
-config PACKAGE_$(PKG_NAME)_Transparent_Proxy
-	bool "Transparent Proxy"
-	select PACKAGE_dnsmasq-full
-	select PACKAGE_ipset
-	select PACKAGE_iptables
-	select PACKAGE_iptables-legacy
-	select PACKAGE_iptables-mod-iprange
-	select PACKAGE_iptables-mod-socket
-	select PACKAGE_iptables-mod-tproxy
-	select PACKAGE_kmod-ipt-nat
-	default y
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Brook
 	bool "Include Brook"
