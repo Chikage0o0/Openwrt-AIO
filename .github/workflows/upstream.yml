@@ -56,10 +56,10 @@ jobs:
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-ssr-plus
         
         # passwall
-        svn export https://github.com/xiaorouji/openwrt-passwall/branches/luci/luci-app-passwall
+        svn export https://github.com/Chikage0o0/openwrt-passwall/branches/luci/luci-app-passwall
 
         # passwall2
-        svn export https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2
+        svn export https://github.com/Chikage0o0/openwrt-passwall2/trunk/luci-app-passwall2
 
         # openclash
         # svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash 暂时屏蔽最新版
