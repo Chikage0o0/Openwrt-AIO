@@ -302,7 +302,7 @@ run_v2ray() {
 	}
 	[ "$direct_dns_protocol" = "auto" ] && {
 		direct_dns_protocol="udp"
-		direct_dns_udp_server=${DEFAULT_DNS:-119.29.29.29}
+		direct_dns_udp_server=${AUTO_DNS}
 	}
 	case "$direct_dns_protocol" in
 		udp)
@@ -548,9 +548,10 @@ run_global() {
 		V2RAY_ARGS="${V2RAY_ARGS} direct_dns_protocol=${DIRECT_DNS_PROTOCOL}"
 		case "$DIRECT_DNS_PROTOCOL" in
 			auto)
-				msg="${msg} 直连DNS：${DEFAULT_DNS:-119.29.29.29}"
+				msg="${msg} 直连DNS：${AUTO_DNS}"
 			;;
 			udp)
+				LOCAL_DNS=${DIRECT_DNS}
 				V2RAY_ARGS="${V2RAY_ARGS} direct_dns_udp_server=${DIRECT_DNS}"
 				msg="${msg} 直连DNS：${DIRECT_DNS}"
 			;;
@@ -593,7 +594,7 @@ run_global() {
 	echolog ${msg}
 	
 	source $APP_PATH/helper_dnsmasq.sh stretch
-	source $APP_PATH/helper_dnsmasq.sh add TMP_DNSMASQ_PATH=$TMP_DNSMASQ_PATH DNSMASQ_CONF_FILE=/tmp/dnsmasq.d/dnsmasq-passwall2.conf DEFAULT_DNS=$DEFAULT_DNS TUN_DNS=$TUN_DNS
+	source $APP_PATH/helper_dnsmasq.sh add TMP_DNSMASQ_PATH=$TMP_DNSMASQ_PATH DNSMASQ_CONF_FILE=/tmp/dnsmasq.d/dnsmasq-passwall2.conf DEFAULT_DNS=$AUTO_DNS LOCAL_DNS=$LOCAL_DNS TUN_DNS=$TUN_DNS
 
 	V2RAY_CONFIG=$TMP_PATH/global.json
 	V2RAY_LOG=$TMP_PATH/global.log
@@ -787,8 +788,8 @@ RESOLVFILE=/tmp/resolv.conf.d/resolv.conf.auto
 [ -f "${RESOLVFILE}" ] && [ -s "${RESOLVFILE}" ] || RESOLVFILE=/tmp/resolv.conf.auto
 TCP_NO_REDIR_PORTS=$(config_t_get global_forwarding tcp_no_redir_ports 'disable')
 UDP_NO_REDIR_PORTS=$(config_t_get global_forwarding udp_no_redir_ports 'disable')
-TCP_REDIR_PORTS="1:65535"
-UDP_REDIR_PORTS="1:65535"
+TCP_REDIR_PORTS=$(config_t_get global_forwarding tcp_redir_ports '22,25,53,143,465,587,853,993,995,80,443')
+UDP_REDIR_PORTS=$(config_t_get global_forwarding udp_redir_ports '1:65535')
 TCP_PROXY_MODE="global"
 UDP_PROXY_MODE="global"
 LOCALHOST_TCP_PROXY_MODE="global"
@@ -802,6 +803,7 @@ DNS_CACHE=$(config_t_get global dns_cache 1)
 
 DEFAULT_DNS=$(uci show dhcp | grep "@dnsmasq" | grep "\.server=" | awk -F '=' '{print $2}' | sed "s/'//g" | tr ' ' '\n' | grep -v "\/" | head -2 | sed ':label;N;s/\n/,/;b label')
 [ -z "${DEFAULT_DNS}" ] && DEFAULT_DNS=$(echo -n $(sed -n 's/^nameserver[ \t]*\([^ ]*\)$/\1/p' "${RESOLVFILE}" | grep -v -E "0.0.0.0|127.0.0.1|::" | head -2) | tr ' ' ',')
+AUTO_DNS=${DEFAULT_DNS:-119.29.29.29}
 
 PROXY_IPV6=$(config_t_get global_forwarding ipv6_tproxy 0)
 
