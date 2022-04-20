@@ -79,7 +79,7 @@ jobs:
       if: env.image_build == 'true'
       run: |
         mkdir /workdir/image
-        for img in `find /workdir/bin/target/ -name *.img.gz -or  -name *.bin`; do
+        for img in `find /workdir/bin/target/ -name *.img.gz -or  -name *sysupgrade.bin`; do
           mv $img /workdir/image
         done
 
