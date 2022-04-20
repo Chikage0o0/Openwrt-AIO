@@ -20,3 +20,5 @@ make image PROFILE="xiaomi_mi-router-4a-gigabit" PACKAGES="luci luci-lib-ipkg -d
 make image PROFILE="xiaomi_mi-router-ac2100" PACKAGES="luci luci-lib-ipkg -dnsmasq dnsmasq-full luci-i18n-opkg-zh-cn luci-i18n-firewall-zh-cn luci-i18n-base-zh-cn luci-compat luci-lib-ipkg" FILES="files"
 
 make image PROFILE="xiaomi_redmi-router-ac2100" PACKAGES="luci luci-lib-ipkg -dnsmasq dnsmasq-full luci-i18n-opkg-zh-cn luci-i18n-firewall-zh-cn luci-i18n-base-zh-cn luci-compat luci-lib-ipkg" FILES="files"
+
+make image PROFILE="dlink_dir-878-a1" PACKAGES="luci luci-lib-ipkg -dnsmasq dnsmasq-full luci-i18n-opkg-zh-cn luci-i18n-firewall-zh-cn luci-i18n-base-zh-cn luci-compat luci-lib-ipkg" FILES="files"
