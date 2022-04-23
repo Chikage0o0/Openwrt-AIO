@@ -70,6 +70,9 @@ jobs:
         mv -n `find openwrt-passwall/* -maxdepth 0 -type d` ./ && rm -rf openwrt-passwall
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/redsocks2
 
+        # 迅雷快鸟
+        svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-xlnetacc
+
         # mosdns
         svn export https://github.com/QiuSimons/openwrt-mos/trunk/luci-app-mosdns
         svn export https://github.com/QiuSimons/openwrt-mos/trunk/mosdns
