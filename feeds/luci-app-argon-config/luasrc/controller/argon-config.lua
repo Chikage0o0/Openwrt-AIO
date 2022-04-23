@@ -6,6 +6,5 @@ function index()
 	end
 
 	local page = entry({"admin", "system", "argon-config"}, form("argon-config"), _("Argon Config"), 90)
-	page.dependent = true
 	page.acl_depends = { "luci-app-argon-config" }
 end
