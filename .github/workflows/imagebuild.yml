@@ -18,7 +18,7 @@ on:
   
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
-  VERSION: 21.02.2
+  VERSION: 21.02.3
   USE_TG: false
 
 jobs:
