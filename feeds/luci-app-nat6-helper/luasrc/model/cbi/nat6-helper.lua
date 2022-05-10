@@ -14,7 +14,7 @@ enabled.rmempty = false
 name = s:option(Value, "name", translate("Interface"))
 name.rmempty = false
 name.default = "wan6"
-name.description = translate("填入 IPv6 接口名(默认为 wan6 )，即可使 NAT6 随该接口状态自动开启或关闭")
+name.description = translate("填入 IPv6 接口名 (默认为 wan6 )，即可使 NAT6 随该接口状态自动开启或关闭")
 run = s:option(Button, "run_button", translate("启动"))
 run.inputstyle = "apply"
 function run.write(self, section)
@@ -25,6 +25,14 @@ stop = s:option(Button, "stop_button", translate("关闭"))
 stop.inputstyle = "apply"
 function stop.write(self, section)
 	io.popen("/etc/init.d/nat6-helper stop")
+end
+
+init = s:option(Button, "init_button", translate("初始化"))
+init.inputtitle = translate("执行 IPv6 初始化脚本")
+init.inputstyle = "apply"
+init.description = translate("执行 IPv6 初始化脚本 ( /etc/ipv6nat.sh )，仅需执行一次！")
+function init.write(self, section)
+	io.popen("bash /etc/ipv6nat.sh >> /etc/ipv6nat.log 2>&1")
 end
 
 return m

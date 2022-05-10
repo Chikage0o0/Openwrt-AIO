@@ -16,7 +16,15 @@ if [ "$ACTION" = ifup ]; then
     if !(ip6tables-save -t nat | grep -q "v6NAT"); then
         ip6tables -t nat -A POSTROUTING -o $interface -m comment --comment "v6NAT" -j MASQUERADE
     fi
-else
+elif [ "$ACTION" = ifupdate ]; then
+    ip -6 r del default via $gateway dev $interface
+    ip -6 r add default via $gateway dev $interface
+    if !(ip6tables-save -t nat | grep -q "v6NAT"); then
+        ip6tables -t nat -A POSTROUTING -o $interface -m comment --comment "v6NAT" -j MASQUERADE
+    fi
+elif [ "$ACTION" = ifdown ]; then
     ip6tables -t nat -D POSTROUTING -o $interface -m comment --comment "v6NAT" -j MASQUERADE
     ip -6 r del default via $gateway dev $interface
+else
+    exit 0
 fi

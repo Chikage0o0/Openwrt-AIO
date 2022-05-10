@@ -11,29 +11,38 @@
 #     只需要运行一次
 # -------------------------------------------------------------------
 
+#set -ex
+
+echo -e "\n-------------------------------------------------------------------\n"
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") Execute \"/etc/ipv6nat.sh\" script begin!\n"
+
 
 # 1. Install the package kmod-ipt-nat6    # 安装kmod-ipt-nat6
 #opkg update
 #opkg install kmod-ipt-nat6
 
 
-# 1. Change the "IPv6 ULA Prefix" to 2fff::/64
+# 1. Change the "IPv6 ULA Prefix" to "2fff::/64"
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") 1. Change the \"IPv6 ULA Prefix\" to 2fff::/64\n"
 uci set network.globals.ula_prefix="2fff::/64"
 uci commit network
 
 
-# 2. Change the first letter of the "IPv6 ULA Prefix" from f to d
+# 2. Change the first letter of the "IPv6 ULA Prefix" from "f" to "d"
 # ULA，全称为“唯一的本地 IPv6 单播地址”（Unique Local IPv6 Unicast Address）。这一步，我们要把它的前缀由 f 改为 d ，以将本地的 IPv6 地址向外广播，而不是 localhost 那样的闭环。
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") 2. Change the first letter of the \"IPv6 ULA Prefix\" from \"f\" to \"d\"\n"
 uci set network.globals.ula_prefix="$(uci get network.globals.ula_prefix | sed 's/^./d/')"
 uci commit network
 
 
 # 3. Set the DHCP server to "Always announce default router"  # 将 DHCP 服务器模式设置为“总是广播默认路由”
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") 3. Set the DHCP server to \"Always announce default router\"\n"
 uci set dhcp.lan.ra_default='1'
 uci commit dhcp
 
 
 # 4. Add an init script for NAT6 by creating a new file /etc/init.d/nat6 and paste the code from the section Init Script into it    #生成 nat6 脚本
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") 4. Add an init script (/etc/init.d/nat6)\n"
 touch /etc/init.d/nat6
 cat > /etc/init.d/nat6 << EOF
 #!/bin/sh /etc/rc.common
@@ -129,6 +138,7 @@ EOF
 
 
 # 5. Make the script executable and enable it    #修改权限，并生效
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") 5. Make the script executable and enable it\n"
 chmod +x /etc/init.d/nat6
 /etc/init.d/nat6 enable
 /etc/init.d/nat6 start
@@ -139,17 +149,19 @@ chmod +x /etc/init.d/nat6-helper
 
 # 6. In addition, you may now disable the default firewall rule "Allow-ICMPv6-Forward" since it's not needed when masquerading is enabled
 # 6. 关闭不需要的防火墙规则：OpenWrt 的防火墙中有一个默认规则，叫 Allow-ICMPv6-Forward 。该规则在我们的实际使用中并不需要，因为我们用于 IPv6 内网穿透的 Masquerade 模块已经取代了它的功能。
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") 6. Disable the default firewall rule \"Allow-ICMPv6-Forward\" since it's not needed when masquerading is enabled\n"
 uci set firewall.@rule["$(uci show firewall | grep 'Allow-ICMPv6-Forward' | cut -d'[' -f2 | cut -d']' -f1)"].enabled='0'
 uci commit firewall
 
 
 # 7. Modify /etc/sysctl.conf. If entries not exist, add them. 
 # It's about to receive broadcasts and enable IPv6 transfer.
-# NOTICE: The newest 18.06.1 doesn't have net.ipv6.conf.default.forwarding and net.ipv6.conf.all.forwarding,
+# NOTICE: The 18.06.1 doesn't have net.ipv6.conf.default.forwarding and net.ipv6.conf.all.forwarding,
 #         so I have to attach them.
 #
 # 7.修改/etc/sysctl.conf，把文件中相关内容改为以下内容，没有的话就添加，大概说接收广播并开启 IPv6 转发
-# 注意：最新的 18.06.1 中没有 net.ipv6.conf.default.forwarding 和 net.ipv6.conf.all.forwarding ，需在文件末尾额外添加之
+# 注意：18.06.1 中没有 net.ipv6.conf.default.forwarding 和 net.ipv6.conf.all.forwarding ，需在文件末尾额外添加之
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") 7. Modify /etc/sysctl.conf. If entries not exist, add them.\n"
 touch /etc/sysctl.conf
 
 a=$(sed -n '/net.ipv6.conf.default.forwarding/=' /etc/sysctl.conf)
@@ -183,8 +195,12 @@ else
 fi
 
 
-# 8. Add transfer rules to firewall.
+# 8. Add POSTROUTING / MASQUERADE rules to firewall.
 # 8. 加入转发规则，编辑 /etc/firewall.user ，或路由器界面防火墙规则里加上 ip6tables -t nat -I POSTROUTING -s dfff::/64 -j MASQUERADE
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") 8. Add POSTROUTING / MASQUERADE rules to firewall.\n"
 echo "ip6tables -t nat -I POSTROUTING -s $(uci get network.globals.ula_prefix) -j MASQUERADE" >> /etc/firewall.user
 /etc/init.d/firewall restart
 
+
+echo -e "\n$(date +"%Y-%m-%d %H:%M:%S") Execute \"/etc/ipv6nat.sh\" script end!\n"
+echo -e "\n-------------------------------------------------------------------\n"
