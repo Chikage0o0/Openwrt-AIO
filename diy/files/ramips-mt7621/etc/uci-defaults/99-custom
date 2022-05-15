@@ -33,4 +33,4 @@ uci commit firewall
 
 #edit feeds
 sed -i 's/downloads.openwrt.org/mirrors.ustc.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
-echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/ramips-mt7621' >> /etc/opkg/distfeeds.conf
+echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/ramips-mt7621' >> /etc/opkg/customfeeds.conf
