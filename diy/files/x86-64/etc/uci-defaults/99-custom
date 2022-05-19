@@ -1,4 +1,9 @@
 #!/bin/sh
+
+#edit feeds
+sed -i 's/downloads.openwrt.org/mirrors.ustc.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
+[ "$(grep "custom" /etc/opkg/distfeeds.conf)" == "" ] && echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/x86-64' >> /etc/opkg/distfeeds.conf
+
 [ "$(uci -q get system.@system[0].init)" != "" ] && exit 0
 #set lan ip
 uci set network.lan.ipaddr='192.168.10.1'
@@ -18,15 +23,3 @@ uci commit luci
 #enable flow offloading
 uci set firewall.@defaults[0].flow_offloading='1'
 uci commit firewall
-
-uci set passwall.@global_subscribe[0].trojan_type='v2ray'
-uci del passwall.@global_rules[0].gfwlist_url
-uci add_list passwall.@global_rules[0].gfwlist_url='https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/gfw.txt'
-uci add_list passwall.@global_rules[0].gfwlist_url='https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/greatfire.txt'
-uci set passwall.@global[0].tcp_proxy_mode='gfwlist'
-uci set passwall.@global[0].udp_proxy_mode='disable'
-uci commit passwall
-
-#edit feeds
-sed -i 's/downloads.openwrt.org/mirrors.ustc.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
-echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/x86-64' >> /etc/opkg/distfeeds.conf
