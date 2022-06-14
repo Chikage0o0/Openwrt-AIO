@@ -2,18 +2,13 @@
 sudo chown -R 1000:1000 /home/build
 # 修复upx异常
 sudo apt-get update >> /dev/null 2>&1 
-sudo apt-get install upx git svn -y >> /dev/null 2>&1 
+sudo apt-get install upx git -y >> /dev/null 2>&1 
 ln -s /usr/bin/upx staging_dir/host/bin/upx
 
 # 添加并安装源
 echo "src-link custom /home/build/custom-feed/feeds" >> feeds.conf.default
 ./scripts/feeds update -a >> /dev/null 2>&1 
 ./scripts/feeds install -p custom -a >> /dev/null 2>&1 
-
-# 升级Golang版本
-pushd feeds/packages/lang
-rm -rf golang && svn export https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang
-popd
 
 cp -rf custom.config .config
 make defconfig >> /dev/null 2>&1 
