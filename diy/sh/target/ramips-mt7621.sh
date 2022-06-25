@@ -22,3 +22,5 @@ make image PROFILE="xiaomi_mi-router-ac2100" PACKAGES="luci luci-lib-ipkg -dnsma
 make image PROFILE="xiaomi_redmi-router-ac2100" PACKAGES="luci luci-lib-ipkg -dnsmasq dnsmasq-full luci-i18n-opkg-zh-cn luci-i18n-firewall-zh-cn luci-i18n-base-zh-cn luci-compat luci-lib-ipkg" FILES="files"
 
 make image PROFILE="dlink_dir-878-a1" PACKAGES="luci luci-lib-ipkg -dnsmasq dnsmasq-full luci-i18n-opkg-zh-cn luci-i18n-firewall-zh-cn luci-i18n-base-zh-cn luci-compat luci-lib-ipkg" FILES="files"
+
+make image PROFILE="hiwifi_hc5962" PACKAGES="luci luci-lib-ipkg -dnsmasq dnsmasq-full luci-i18n-opkg-zh-cn luci-i18n-firewall-zh-cn luci-i18n-base-zh-cn luci-compat luci-lib-ipkg -kmod-usb3" FILES="files"
