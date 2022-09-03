@@ -17,12 +17,13 @@ if [ "$1" = "one_key_update" ]; then
    uci -q commit openclash
    /usr/share/openclash/openclash_core.sh "$1" >/dev/null 2>&1 &
    /usr/share/openclash/openclash_core.sh "TUN" "$1" >/dev/null 2>&1 &
+   /usr/share/openclash/openclash_core.sh "Meta" "$1" >/dev/null 2>&1 &
    wait
 fi
 
 LAST_OPVER="/tmp/openclash_last_version"
 LAST_VER=$(sed -n 1p "$LAST_OPVER" 2>/dev/null |sed "s/^v//g" |tr -d "\n")
-OP_CV=$(sed -n 1p /usr/share/openclash/res/openclash_version 2>/dev/null |awk -F '-' '{print $1}' |awk -F 'v' '{print $2}' |awk -F '.' '{print $2$3}' 2>/dev/null)
+OP_CV=$(opkg status luci-app-openclash 2>/dev/null |grep 'Version' |awk -F '-' '{print $1}' |awk -F 'Version: ' '{print $2}' |awk -F '.' '{print $2$3}' 2>/dev/null)
 OP_LV=$(sed -n 1p $LAST_OPVER 2>/dev/null |awk -F '-' '{print $1}' |awk -F 'v' '{print $2}' |awk -F '.' '{print $2$3}' 2>/dev/null)
 RELEASE_BRANCH=$(uci -q get openclash.config.release_branch || echo "master")
 github_address_mod=$(uci -q get openclash.config.github_address_mod || echo 0)
@@ -33,6 +34,10 @@ if [ "$(expr "$OP_LV" \> "$OP_CV")" -eq 1 ] && [ -f "$LAST_OPVER" ]; then
    if [ "$github_address_mod" != "0" ]; then
       if [ "$github_address_mod" == "https://cdn.jsdelivr.net/" ]; then
          curl -sL -m 30 --speed-time 15 --speed-limit 1 https://cdn.jsdelivr.net/gh/vernesong/OpenClash@"$RELEASE_BRANCH"/luci-app-openclash_"$LAST_VER"_all.ipk -o /tmp/openclash.ipk >/dev/null 2>&1
+      elif [ "$github_address_mod" == "https://fastly.jsdelivr.net/" ]; then
+         curl -sL -m 30 --speed-time 15 --speed-limit 1 https://fastly.jsdelivr.net/gh/vernesong/OpenClash@"$RELEASE_BRANCH"/luci-app-openclash_"$LAST_VER"_all.ipk -o /tmp/openclash.ipk >/dev/null 2>&1
+      elif [ "$github_address_mod" == "https://raw.fastgit.org/" ]; then
+         curl -sL -m 30 --speed-time 15 --speed-limit 1 https://raw.fastgit.org/vernesong/OpenClash/"$RELEASE_BRANCH"/luci-app-openclash_"$LAST_VER"_all.ipk -o /tmp/openclash.ipk >/dev/null 2>&1
       else
          curl -sL -m 30 --speed-time 15 --speed-limit 1 "$github_address_mod"https://raw.githubusercontent.com/vernesong/OpenClash/"$RELEASE_BRANCH"/luci-app-openclash_"$LAST_VER"_all.ipk -o /tmp/openclash.ipk >/dev/null 2>&1
       fi
@@ -40,13 +45,13 @@ if [ "$(expr "$OP_LV" \> "$OP_CV")" -eq 1 ] && [ -f "$LAST_OPVER" ]; then
       curl -sL -m 30 --speed-time 15 --speed-limit 1 https://raw.githubusercontent.com/vernesong/OpenClash/"$RELEASE_BRANCH"/luci-app-openclash_"$LAST_VER"_all.ipk -o /tmp/openclash.ipk >/dev/null 2>&1
    fi
    if [ "$?" != "0" ]; then
-      curl -sL -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://mirrors.tuna.tsinghua.edu.cn/osdn/storage/g/o/op/openclash/"$RELEASE_BRANCH"/luci-app-openclash_"$LAST_VER"_all.ipk -o /tmp/openclash.ipk >/dev/null 2>&1
+      curl -sL -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://ftp.jaist.ac.jp/pub/sourceforge.jp/storage/g/o/op/openclash/"$RELEASE_BRANCH"/luci-app-openclash_"$LAST_VER"_all.ipk -o /tmp/openclash.ipk >/dev/null 2>&1
    fi
    if [ "$?" == "0" ] && [ -s "/tmp/openclash.ipk" ]; then
       LOG_OUT "【OpenClash - v$LAST_VER】Download Successful, Start Pre Update Test..."
       
       if [ -z "$(opkg install /tmp/openclash.ipk --noaction 2>/dev/null |grep 'Upgrading luci-app-openclash on root' 2>/dev/null)" ]; then
-         LOG_OUT "【OpenClash - v$LAST_VER】Pre Update Test Failed, The File is Saved in /tmp/opencrash.ipk, Please Try to Update Manually!"
+         LOG_OUT "【OpenClash - v$LAST_VER】Pre Update Test Failed, The File is Saved in /tmp/openclash.ipk, Please Try to Update Manually!"
          if [ "$(uci -q get openclash.config.config_reload)" -eq 0 ]; then
       	    /etc/init.d/openclash restart >/dev/null 2>&1 &
          else

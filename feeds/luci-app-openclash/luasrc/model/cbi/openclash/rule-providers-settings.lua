@@ -14,7 +14,7 @@ m.pageaction = false
 m.description=translate("Attention:")..
 "<br/>"..translate("The game proxy is a test function and does not guarantee the availability of rules")..
 "<br/>"..translate("Preparation steps:")..
-"<br/>"..translate("1. In the <server and policy group management> page, create the policy group and node you are going to use, and apply the configuration (when adding nodes, you must select the policy group you want to join). Policy group type suggestion: fallback, game nodes must support UDP")..
+"<br/>"..translate("1. In the <server and policy group management> page, create the policy group and node you are going to use, and apply the configuration (when adding nodes, you must select the policy group you want to join). Policy group type suggestion: fallback, game nodes must be support UDP and not a Vmess")..
 "<br/>"..translate("2. Click the <manage third party game rules> or <manage third party rule set> button to enter the rule list and download the rules you want to use")..
 "<br/>"..translate("3. On this page, set the corresponding configuration file and policy group of the rule you have downloaded, and save the settings")..
 "<br/>"..translate("4. Install the TUN core")..
@@ -42,7 +42,7 @@ function IsYmlFile(e)
 end
 
 -- [[ Edit Game Rule ]] --
-s = m:section(TypedSection, "game_config", translate("Game Rules and Groups (Only TUN Core Support)"))
+s = m:section(TypedSection, "game_config", translate("Game Rules and Groups (Only TUN & Meta Core Support)"))
 s.anonymous = true
 s.addremove = true
 s.sortable = true
@@ -93,18 +93,32 @@ o.rmempty = true
 
 ---- Proxy Group
 o = s:option(ListValue, "group", translate("Select Proxy Group"))
-uci:foreach("openclash", "groups",
-		function(s)
-		  if s.name ~= "" and s.name ~= nil then
-			   o:value(s.name)
+local groupnames,filename
+filename = m.uci:get(openclash, "config", "config_path")
+if filename then
+	groupnames = SYS.exec(string.format('ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "YAML.load_file(\'%s\')[\'proxy-groups\'].each do |i| puts i[\'name\']+\'##\' end" 2>/dev/null',filename))
+	if groupnames then
+		for groupname in string.gmatch(groupnames, "([^'##\n']+)##") do
+			if groupname ~= nil and groupname ~= "" then
+			  o:value(groupname)
 			end
-		end)
+		end
+	end
+end
+
+uci:foreach("openclash", "groups",
+    function(s)
+      if s.name ~= "" and s.name ~= nil then
+        o:value(s.name)
+      end
+    end)
+
 o:value("DIRECT")
 o:value("REJECT")
 o.rmempty = true
 
 -- [[ Edit Other Rule Provider ]] --
-s = m:section(TypedSection, "rule_provider_config", translate("Other Rule Providers and Groups (Only TUN Core Support)"))
+s = m:section(TypedSection, "rule_provider_config", translate("Other Rule Providers and Groups (Only TUN & Meta Core Support)"))
 s.anonymous = true
 s.addremove = true
 s.sortable = true
@@ -155,12 +169,26 @@ o.rmempty = true
 
 ---- Proxy Group
 o = s:option(ListValue, "group", translate("Select Proxy Group"))
-uci:foreach("openclash", "groups",
-		function(s)
-		  if s.name ~= "" and s.name ~= nil then
-			   o:value(s.name)
+local groupnames,filename
+filename = m.uci:get(openclash, "config", "config_path")
+if filename then
+	groupnames = SYS.exec(string.format('ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "YAML.load_file(\'%s\')[\'proxy-groups\'].each do |i| puts i[\'name\']+\'##\' end" 2>/dev/null',filename))
+	if groupnames then
+		for groupname in string.gmatch(groupnames, "([^'##\n']+)##") do
+			if groupname ~= nil and groupname ~= "" then
+			  o:value(groupname)
 			end
-		end)
+		end
+	end
+end
+
+uci:foreach("openclash", "groups",
+    function(s)
+      if s.name ~= "" and s.name ~= nil then
+        o:value(s.name)
+      end
+    end)
+
 o:value("DIRECT")
 o:value("REJECT")
 o.rmempty = true
@@ -176,7 +204,7 @@ o:value("0", translate("Priority Match"))
 o:value("1", translate("Extended Match"))
 
 -- [[ Edit Custom Rule Provider ]] --
-s = m:section(TypedSection, "rule_providers", translate("Custom Rule Providers and Groups (Only TUN Core Support)"))
+s = m:section(TypedSection, "rule_providers", translate("Custom Rule Providers and Groups (Only TUN & Meta Core Support)"))
 s.anonymous = true
 s.addremove = true
 s.sortable = true

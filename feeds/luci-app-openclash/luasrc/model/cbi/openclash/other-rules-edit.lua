@@ -53,7 +53,7 @@ for t,f in ipairs(fs.glob("/etc/openclash/config/*"))do
     end
     if e[t].name == m.uci:get(openclash, sid, "config") then
     	filename = e[t].name
-      groupnames = sys.exec(string.format('ruby -ryaml -E UTF-8 -e "YAML.load_file(\'%s\')[\'proxy-groups\'].each do |i| puts i[\'name\']+\'##\' end" 2>/dev/null',f))
+      groupnames = sys.exec(string.format('ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "YAML.load_file(\'%s\')[\'proxy-groups\'].each do |i| puts i[\'name\']+\'##\' end" 2>/dev/null',f))
     end
   end
 end
@@ -124,6 +124,17 @@ o:value("DIRECT")
 o:value("REJECT")
 
 o = s:option(ListValue, "Bilibili", translate("Bilibili"))
+o:depends("rule_name", "lhie1")
+o.rmempty = true
+for groupname in string.gmatch(groupnames, "([^'##\n']+)##") do
+  if groupname ~= nil and groupname ~= "" then
+    o:value(groupname)
+  end
+end
+o:value("DIRECT")
+o:value("REJECT")
+
+o = s:option(ListValue, "Douyin", translate("Douyin"))
 o:depends("rule_name", "lhie1")
 o.rmempty = true
 for groupname in string.gmatch(groupnames, "([^'##\n']+)##") do
@@ -310,6 +321,17 @@ end
 o:value("DIRECT")
 o:value("REJECT")
 
+o = s:option(ListValue, "Crypto", translate("Crypto"))
+o:depends("rule_name", "lhie1")
+o.rmempty = true
+for groupname in string.gmatch(groupnames, "([^'##\n']+)##") do
+  if groupname ~= nil and groupname ~= "" then
+    o:value(groupname)
+  end
+end
+o:value("DIRECT")
+o:value("REJECT")
+
 o = s:option(ListValue, "PayPal", translate("PayPal"))
 o:depends("rule_name", "lhie1")
 o.rmempty = true
@@ -381,4 +403,5 @@ o.write = function()
    luci.http.redirect(m.redirect)
 end
 
+m:append(Template("openclash/toolbar_show"))
 return m

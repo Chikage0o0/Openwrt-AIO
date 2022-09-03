@@ -33,7 +33,7 @@ urlencode() {
    if [ "$#" -eq 1 ]; then
       data=$(curl -s -o /dev/null -w %{url_effective} --get --data-urlencode "key=$1" "")
       if [ ! -z "$data" ]; then
-         echo "$(echo ${data##/?key=} |sed 's/\//%2f/g' |sed 's/:/%3a/g' |sed 's/?/%3f/g' |sed 's/(/%28/g' |sed 's/)/%29/g' |sed 's/\^/%5e/g' |sed 's/=/%3d/g' |sed 's/|/%7c/g' |sed 's/+/%20/g')"
+         echo -n "$(echo ${data##/?key=} |sed 's/\//%2f/g' |sed 's/:/%3a/g' |sed 's/?/%3f/g' |sed 's/(/%28/g' |sed 's/)/%29/g' |sed 's/\^/%5e/g' |sed 's/=/%3d/g' |sed 's/|/%7c/g' |sed 's/+/%20/g')"
       fi
    fi
 }
@@ -76,7 +76,7 @@ config_cus_up()
 	if [ -z "$subscribe_url_param" ]; then
 	   if [ -n "$key_match_param" ] || [ -n "$key_ex_match_param" ]; then
 	      LOG_OUT "Config File【$name】is Replaced Successfully, Start Picking Nodes..."	      
-	      ruby -ryaml -E UTF-8 -e "
+	      ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
 	      begin
 	         Value = YAML.load_file('$CONFIG_FILE');
 	         if Value.has_key?('proxies') and not Value['proxies'].to_a.empty? then
@@ -170,7 +170,7 @@ config_su_check()
          cp "$CFG_FILE" "$BACKPACK_FILE"
          #保留规则部分
          if [ "$servers_update" -eq 1 ] && [ "$only_download" -eq 0 ]; then
-   	        ruby -ryaml -E UTF-8 -e "
+   	        ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
                Value = YAML.load_file('$CONFIG_FILE');
                Value_1 = YAML.load_file('$CFG_FILE');
                if Value.key?('rules') or Value.key?('script') or Value.key?('rule-providers') then
@@ -248,7 +248,7 @@ change_dns()
 field_name_check()
 {
    #检查field名称（不兼容旧写法）
-   ruby -ryaml -E UTF-8 -e "
+   ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
       Value = YAML.load_file('$CFG_FILE');
       if Value.key?('Proxy') or Value.key?('Proxy Group') or Value.key?('Rule') or Value.key?('rule-provider') then
          if Value.key?('Proxy') then
@@ -311,7 +311,7 @@ EOF
       config_download
       
       if [ "$?" -eq 0 ] && [ -s "$CFG_FILE" ]; then
-         ruby -ryaml -E UTF-8 -e "
+         ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
          begin
          YAML.load_file('$CFG_FILE');
          rescue Exception => e
@@ -489,7 +489,7 @@ sub_info_get()
    config_download
 
    if [ "$?" -eq 0 ] && [ -s "$CFG_FILE" ]; then
-   	  ruby -ryaml -E UTF-8 -e "
+   	ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
       begin
       YAML.load_file('$CFG_FILE');
       rescue Exception => e

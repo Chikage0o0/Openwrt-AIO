@@ -132,7 +132,6 @@ payload:
   - DOMAIN-SUFFIX,store.videojj.com
   - DOMAIN-SUFFIX,v2.da.mgtv.com
   - DOMAIN-SUFFIX,va.videojj.com
-  - DOMAIN-SUFFIX,videojj.com
   - DOMAIN-SUFFIX,web.da.mgtv.com
   - DOMAIN-SUFFIX,x.da.hunantv.com
   - DOMAIN-SUFFIX,x.da.mgtv.com
@@ -1423,6 +1422,7 @@ payload:
   - DOMAIN-SUFFIX,am.zdnet.com.cn
   - DOMAIN-SUFFIX,am15.net
   - DOMAIN-SUFFIX,amazingmagics.com
+  - DOMAIN-SUFFIX,amazon-adsystem.com
   - DOMAIN-SUFFIX,amdc.m.taobao.com
   - DOMAIN-SUFFIX,amfi.gou.sogou.com
   - DOMAIN-SUFFIX,amiok.org
@@ -1585,6 +1585,7 @@ payload:
   - DOMAIN-SUFFIX,apps2.outfit7.com
   - DOMAIN-SUFFIX,appsdk.tanv.com
   - DOMAIN-SUFFIX,appservices.comcsoft.com
+  - DOMAIN-SUFFIX,appsflyer.com
   - DOMAIN-SUFFIX,appspromote.wostore.cn
   - DOMAIN-SUFFIX,appsrv1.madserving.com
   - DOMAIN-SUFFIX,appsrv4.madserving.com
@@ -2246,6 +2247,7 @@ payload:
   - DOMAIN-SUFFIX,chidir.com
   - DOMAIN-SUFFIX,chinacsky.com
   - DOMAIN-SUFFIX,chinaheh.com
+  - DOMAIN-SUFFIX,chinaliftoff.io
   - DOMAIN-SUFFIX,chinauma.net
   - DOMAIN-SUFFIX,chinaweichu.net
   - DOMAIN-SUFFIX,chjxzk.1555110.cn
@@ -2488,6 +2490,7 @@ payload:
   - DOMAIN-SUFFIX,cqfangduan.com
   - DOMAIN-SUFFIX,cqftonline.com
   - DOMAIN-SUFFIX,cqhnm.com
+  - DOMAIN-SUFFIX,cqhot.club
   - DOMAIN-SUFFIX,cqsta.com
   - DOMAIN-SUFFIX,cqyhd.com
   - DOMAIN-SUFFIX,cr.m.liebao.cn
@@ -3688,6 +3691,7 @@ payload:
   - DOMAIN-SUFFIX,gog9.qzdfc.com
   - DOMAIN-SUFFIX,go-mpulse.net
   - DOMAIN-SUFFIX,good.ta80.com
+  - DOMAIN-SUFFIX,googleadsserving.cn
   - DOMAIN-SUFFIX,googlecommerce.com
   - DOMAIN-SUFFIX,googlesyndication.com
   - DOMAIN-SUFFIX,goolpter.com
@@ -5265,7 +5269,6 @@ payload:
   - DOMAIN-SUFFIX,mbrowser.news.haosou.com
   - DOMAIN-SUFFIX,mbrowser.news.so.com
   - DOMAIN-SUFFIX,mbs.weathercn.com
-  - DOMAIN-SUFFIX,mc.hujiang.com
   - DOMAIN-SUFFIX,mc.yandex.ru
   - DOMAIN-SUFFIX,mclick.simba.taobao.com
   - DOMAIN-SUFFIX,mcore.vcgame.cn

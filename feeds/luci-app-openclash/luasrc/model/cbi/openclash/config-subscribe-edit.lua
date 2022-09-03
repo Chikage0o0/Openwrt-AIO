@@ -23,7 +23,7 @@ m.description=translate("Convert Subscribe function of Online is Supported By su
 "<br/>"..
 "<br/>"..translate("If you need to customize the external configuration file (subscription conversion template), please write it according to the instructions, upload it to the accessible location of the external network, and fill in the address correctly when using it")..
 "<br/>"..
-"<br/>"..translate("If you have a recommended external configuration file (subscription conversion template), you can modify by following The file format of /usr/share/opencrash/res/sub_ini.list and pr")
+"<br/>"..translate("If you have a recommended external configuration file (subscription conversion template), you can modify by following The file format of /usr/share/openclash/res/sub_ini.list and pr")
 m.redirect = luci.dispatcher.build_url("admin/services/openclash/config-subscribe")
 if m.uci:get(openclash, sid) ~= "config_subscribe" then
 	luci.http.redirect(m.redirect)
@@ -95,6 +95,7 @@ o.description = font_red..bold_on..translate("Note: There is A Risk of Privacy L
 o:depends("sub_convert", "1")
 o:value("https://api.dler.io/sub", translate("api.dler.io")..translate("(Default)"))
 o:value("https://subconverter.herokuapp.com/sub", translate("subconverter.herokuapp.com")..translate("(Default)"))
+o:value("https://v.id9.cc/sub", translate("v.id9.cc")..translate("(Support Vless By Pinyun)"))
 o:value("https://sub.id9.cc/sub", translate("sub.id9.cc"))
 o:value("https://api.wcc.best/sub", translate("api.wcc.best"))
 o.default = "https://api.dler.io/sub"
@@ -208,4 +209,5 @@ o.write = function()
    luci.http.redirect(m.redirect)
 end
 
+m:append(Template("openclash/toolbar_show"))
 return m

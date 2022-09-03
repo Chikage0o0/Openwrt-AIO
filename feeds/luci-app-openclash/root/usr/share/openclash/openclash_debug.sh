@@ -35,9 +35,10 @@ core_type=$(uci -q get openclash.config.core_version)
 cpu_model=$(opkg status libc 2>/dev/null |grep 'Architecture' |awk -F ': ' '{print $2}' 2>/dev/null)
 core_version=$(/etc/openclash/core/clash -v 2>/dev/null |awk -F ' ' '{print $2}' 2>/dev/null)
 core_tun_version=$(/etc/openclash/core/clash_tun -v 2>/dev/null |awk -F ' ' '{print $2}' 2>/dev/null)
+core_meta_version=$(/etc/openclash/core/clash_meta -v 2>/dev/null |awk -F ' ' '{print $3}' 2>/dev/null)
 servers_update=$(uci -q get openclash.config.servers_update)
 mix_proxies=$(uci -q get openclash.config.mix_proxies)
-op_version=$(sed -n 1p /usr/share/openclash/res/openclash_version)
+op_version=$(opkg status luci-app-openclash 2>/dev/null |grep 'Version' |awk -F 'Version: ' '{print "v"$2}')
 china_ip_route=$(uci -q get openclash.config.china_ip_route)
 common_ports=$(uci -q get openclash.config.common_ports)
 dns_remote=$(uci -q -q get openclash.config.dns_remote)
@@ -118,10 +119,10 @@ ruby: $(ts_re "$(opkg status ruby 2>/dev/null |grep 'Status' |awk -F ': ' '{prin
 ruby-yaml: $(ts_re "$(opkg status ruby-yaml 2>/dev/null |grep 'Status' |awk -F ': ' '{print $2}' 2>/dev/null)")
 ruby-psych: $(ts_re "$(opkg status ruby-psych 2>/dev/null |grep 'Status' |awk -F ': ' '{print $2}' 2>/dev/null)")
 ruby-pstore: $(ts_re "$(opkg status ruby-pstore 2>/dev/null |grep 'Status' |awk -F ': ' '{print $2}' 2>/dev/null)")
-ruby-dbm: $(ts_re "$(opkg status ruby-dbm 2>/dev/null |grep 'Status' |awk -F ': ' '{print $2}' 2>/dev/null)")
 kmod-tun(TUN模式): $(ts_re "$(opkg status kmod-tun 2>/dev/null |grep 'Status' |awk -F ': ' '{print $2}' 2>/dev/null)")
 luci-compat(Luci-19.07): $(ts_re "$(opkg status luci-compat 2>/dev/null |grep 'Status' |awk -F ': ' '{print $2}' 2>/dev/null)")
 kmod-inet-diag(PROCESS-NAME): $(ts_re "$(opkg status kmod-inet-diag 2>/dev/null |grep 'Status' |awk -F ': ' '{print $2}' 2>/dev/null)")
+unzip: $(ts_re "$(opkg status unzip 2>/dev/null |grep 'Status' |awk -F ': ' '{print $2}' 2>/dev/null)")
 EOF
 
 #core
@@ -193,6 +194,30 @@ EOF
 else
 cat >> "$DEBUG_LOG" <<-EOF
 Dev内核运行权限: 正常
+EOF
+fi
+
+cat >> "$DEBUG_LOG" <<-EOF
+
+Meta内核版本: $core_meta_version
+EOF
+
+if [ ! -f "/etc/openclash/core/clash_meta" ]; then
+cat >> "$DEBUG_LOG" <<-EOF
+Meta内核文件: 不存在
+EOF
+else
+cat >> "$DEBUG_LOG" <<-EOF
+Meta内核文件: 存在
+EOF
+fi
+if [ ! -x "/etc/openclash/core/clash_meta" ]; then
+cat >> "$DEBUG_LOG" <<-EOF
+Meta内核运行权限: 否
+EOF
+else
+cat >> "$DEBUG_LOG" <<-EOF
+Meta内核运行权限: 正常
 EOF
 fi
 

@@ -37,6 +37,10 @@
       if [ "$github_address_mod" != "0" ]; then
          if [ "$github_address_mod" == "https://cdn.jsdelivr.net/" ]; then
             curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://cdn.jsdelivr.net/gh/dler-io/Rules@master/Clash/Rule.yaml -o /tmp/rules.yaml >/dev/null 2>&1
+	      elif [ "$github_address_mod" == "https://fastly.jsdelivr.net/" ]; then
+            curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://fastly.jsdelivr.net/gh/dler-io/Rules@master/Clash/Rule.yaml -o /tmp/rules.yaml >/dev/null 2>&1
+         elif [ "$github_address_mod" == "https://raw.fastgit.org/" ]; then
+            curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://raw.fastgit.org/dler-io/Rules/master/Clash/Rule.yaml -o /tmp/rules.yaml >/dev/null 2>&1
          else
             curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 "$github_address_mod"https://raw.githubusercontent.com/dler-io/Rules/master/Clash/Rule.yaml -o /tmp/rules.yaml >/dev/null 2>&1
          fi
@@ -48,6 +52,10 @@
       if [ "$github_address_mod" != "0" ]; then
          if [ "$github_address_mod" == "https://cdn.jsdelivr.net/" ]; then
             curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/Outbound.yaml -o /tmp/rules.yaml >/dev/null 2>&1
+	      elif [ "$github_address_mod" == "https://fastly.jsdelivr.net/" ]; then
+            curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://fastly.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/Outbound.yaml -o /tmp/rules.yaml >/dev/null 2>&1
+         elif [ "$github_address_mod" == "https://raw.fastgit.org/" ]; then
+            curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://raw.fastgit.org/DivineEngine/Profiles/master/Clash/Outbound.yaml -o /tmp/rules.yaml >/dev/null 2>&1
          else
             curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 "$github_address_mod"https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/Outbound.yaml -o /tmp/rules.yaml >/dev/null 2>&1
          fi
@@ -60,6 +68,10 @@
       if [ "$github_address_mod" != "0" ]; then
          if [ "$github_address_mod" == "https://cdn.jsdelivr.net/" ]; then
             curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/Inbound.yaml -o /tmp/rules.yaml >/dev/null 2>&1
+	      elif [ "$github_address_mod" == "https://fastly.jsdelivr.net/" ]; then
+            curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://fastly.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/Inbound.yaml -o /tmp/rules.yaml >/dev/null 2>&1
+         elif [ "$github_address_mod" == "https://raw.fastgit.org/" ]; then
+            curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 https://raw.fastgit.org/DivineEngine/Profiles/master/Clash/Inbound.yaml -o /tmp/rules.yaml >/dev/null 2>&1
          else
             curl -sL --connect-timeout 5 -m 30 --speed-time 15 --speed-limit 1 --retry 2 "$github_address_mod"https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/Inbound.yaml -o /tmp/rules.yaml >/dev/null 2>&1
          fi
@@ -69,7 +81,7 @@
    fi
    if [ "$?" -eq "0" ] && [ -s "/tmp/rules.yaml" ]; then
       LOG_OUT "Download Successful, Start Preprocessing Rule File..."
-      ruby -ryaml -E UTF-8 -e "
+      ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
       begin
       YAML.load_file('/tmp/rules.yaml');
       rescue Exception => e
@@ -99,7 +111,7 @@
          del_lock
          exit 0
       #校验是否含有新策略组
-      elif ! "$(ruby -ryaml -E UTF-8 -e "
+      elif ! "$(ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
          Value = YAML.load_file('/usr/share/openclash/res/${rule_name}.yaml');
          Value_1 = YAML.load_file('/tmp/rules.yaml');
          OLD_GROUP = Value['rules'].collect{|x| x.split(',')[2] or x.split(',')[1]}.uniq;
