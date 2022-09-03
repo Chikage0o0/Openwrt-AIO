@@ -22,7 +22,7 @@ on:
 
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
-  VERSION: 21.02.3
+  VERSION: 22.03-SNAPSHOT
   USE_TG: true
   
 jobs:
@@ -53,7 +53,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
-        rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
+        rclone copy $REMOTE_PATH/$VERSION/${{matrix.target}} /workdir/packages/ || true
         echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
         docker run -dt --name sdk -v /workdir/packages/:/home/build/packages/  \
             -v /workdir/key-build:/home/build/openwrt/key-build  \
@@ -98,6 +98,6 @@ jobs:
         
     - name: 上传至目标存储
       run: |
-        rclone delete $REMOTE_PATH/${{matrix.target}}/ || true
-        rclone copy /workdir/packages/ $REMOTE_PATH/${{matrix.target}}/
+        rclone delete $REMOTE_PATH/$VERSION/${{matrix.target}}/ || true
+        rclone copy /workdir/packages/ $REMOTE_PATH/$VERSION/${{matrix.target}}/
     

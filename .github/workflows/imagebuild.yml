@@ -18,7 +18,7 @@ on:
   
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
-  VERSION: 21.02.3
+  VERSION: 22.03-SNAPSHOT
   USE_TG: false
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
-        rclone copy $REMOTE_PATH/${{matrix.target}} /workdir/packages/ || true
+        rclone copy $REMOTE_PATH/$VERSION/${{matrix.target}} /workdir/packages/ || true
         echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
         docker run -dt --name imagebuilder -v /workdir/packages/:/home/build/openwrt/packages/  \
             -v $GITHUB_WORKSPACE/diy/sh/target/${{matrix.target}}.sh:/home/build/openwrt/target.sh \
