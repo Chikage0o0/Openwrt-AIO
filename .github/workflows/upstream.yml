@@ -105,7 +105,7 @@ jobs:
         # 网易云音乐解锁
         svn export https://github.com/maxlicheng/luci-app-unblockmusic/trunk/app luci-app-unblockmusic
         svn export https://github.com/maxlicheng/luci-app-unblockmusic/trunk/UnblockNeteaseMusicGo
-        svn export https://github.com/maxlicheng/luci-app-unblockmusic/trunk/UnblockNeteaseMusic
+        #svn export https://github.com/maxlicheng/luci-app-unblockmusic/trunk/UnblockNeteaseMusic
 
         # 高级设置
         git clone --depth 1 https://github.com/sirpdboy/luci-app-advanced
