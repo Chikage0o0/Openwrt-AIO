@@ -22,7 +22,7 @@ on:
 
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
-  VERSION: 22.03-SNAPSHOT
+  VERSION: 22.03.0
   USE_TG: true
   
 jobs:
