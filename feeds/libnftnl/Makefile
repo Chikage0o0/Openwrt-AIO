@@ -11,9 +11,9 @@ PKG_NAME:=libnftnl
 PKG_VERSION:=1.2.3
 PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_SOURCE_URL:=https://github.com/fullcone-nat-nftables/$(PKG_NAME)-$(PKG_VERSION)-with-fullcone.git
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=5132218d6c0d39f4c8d0dfa6d4bfc0b4da527d5c
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+PKG_SOURCE_URL:=https://netfilter.org/projects/$(PKG_NAME)/files
+PKG_HASH:=e916ea9b79f9518560b9a187251a7c042442a9ecbce7f36be7908888605d0255
 
 PKG_MAINTAINER:=Steven Barth <steven@midlink.org>
 PKG_LICENSE:=GPL-2.0-or-later
