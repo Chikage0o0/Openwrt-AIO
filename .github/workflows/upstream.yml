@@ -45,7 +45,8 @@ jobs:
         #svn export https://github.com/hzyitc/miniupnpd-openwrt-ptpt52-mod/trunk/miniupnpd
 
         #fullcone
-        git clone --depth 1 https://github.com/fullcone-nat-nftables/nft-fullcone
+        git clone --depth 1 https://github.com/Chikage0o0/Openwrt-Fullcone
+        mv -n `find Openwrt-Fullcone/* -maxdepth 0 -type d` ./ && rm -rf Openwrt-Fullcone
 
         # uu游戏加速器
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-uugamebooster
