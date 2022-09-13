@@ -9,9 +9,9 @@ PKG_NAME:=nftables
 PKG_VERSION:=1.0.5
 PKG_RELEASE:=1
 
-PKG_SOURCE_URL:=https://github.com/fullcone-nat-nftables/$(PKG_NAME)-$(PKG_VERSION)-with-fullcone.git
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=9c783d9b4a67fb6c8ff760634f2c7268ceb6e18f
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+PKG_SOURCE_URL:=https://netfilter.org/projects/$(PKG_NAME)/files
+PKG_HASH:=8d1b4b18393af43698d10baa25d2b9b6397969beecac7816c35dd0714e4de50a
 
 PKG_MAINTAINER:=
 PKG_LICENSE:=GPL-2.0
