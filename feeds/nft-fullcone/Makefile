@@ -23,6 +23,7 @@ define KernelPackage/nft-fullcone
   KCONFIG:= CONFIG_NFT_FULLCONE=y CONFIG_NF_NAT=y CONFIG_NF_NAT_IPV6=y CONFIG_NF_CONNTRACK_EVENTS=y CONFIG_NF_CONNTRACK_CHAIN_EVENTS=y
   PROVIDES:=$(PKG_NAME)
   AUTOLOAD:=$(call AutoProbe,nft_fullcone)
+  PKGARCH:=x86_64
 endef
 
 define KernelPackage/nft-fullcone/Description

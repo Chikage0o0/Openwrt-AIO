@@ -26,6 +26,7 @@ define Package/firewall4
 	+ucode +ucode-mod-fs +ucode-mod-ubus +ucode-mod-uci
   EXTRA_DEPENDS:=ucode (>= 2022-03-22)
   PROVIDES:=uci-firewall
+  PKGARCH:=x86_64
 endef
 
 define Package/firewall4/description

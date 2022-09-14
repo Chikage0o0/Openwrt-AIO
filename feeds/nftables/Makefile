@@ -39,6 +39,7 @@ define Package/nftables/Default
   DEPENDS:=+kmod-nft-core +libnftnl
   URL:=http://netfilter.org/projects/nftables/
   PROVIDES:=nftables
+  PKGARCH:=x86_64
 endef
 
 define Package/nftables-nojson

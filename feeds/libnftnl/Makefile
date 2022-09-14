@@ -33,6 +33,7 @@ define Package/libnftnl
   TITLE:=Low-level netlink library for the nf_tables subsystem
   URL:=http://www.netfilter.org/projects/libnftnl
   ABI_VERSION:=11
+  PKGARCH:=x86_64
 endef
 
 define Package/libnftnl/description
