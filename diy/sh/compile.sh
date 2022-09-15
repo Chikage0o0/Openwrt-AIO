@@ -46,15 +46,6 @@ function mvKmod(){
   fi
 }
 
-# 删除mod
-function rmpkg(){
-  if [[ `find bin/targets -name $1` ]];then
-    for ipk in `find bin/targets -name $1`; do
-      rm -f  $ipk
-    done
-  fi
-}
-
 mvKmod "kmod-r8125*.ipk"
 mvKmod "kmod-nft-fullcone*.ipk"
 
@@ -65,13 +56,6 @@ else
   for newipk in `ls $target_path`; do
     rm -f /home/build/packages/${newipk%%_*}_*
   done
-fi
-
-if [[ $target != "x86-64" ]];then
-  rmpkg "firewall4*.ipk"
-  rmpkg "kmod-nft-fullcone*.ipk"
-  rmpkg "libnftnl*.ipk"
-  rmpkg "nftables*.ipk"
 fi
 
 # 生成索引

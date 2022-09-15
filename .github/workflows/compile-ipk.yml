@@ -60,7 +60,6 @@ jobs:
             -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
             -v $GITHUB_WORKSPACE/diy/config/${{matrix.target}}.config:/home/build/openwrt/custom.config \
             -v /workdir/error/:/home/build/openwrt/error/  \
-            -e target=${{matrix.target}} \
              openwrtorg/sdk:${{matrix.target}}-$VERSION
 
     - name: SSH connection to Actions
