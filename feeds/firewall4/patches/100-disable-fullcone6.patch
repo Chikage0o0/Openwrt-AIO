@@ -1,0 +1,25 @@
+From 6fd00eb6e56ca2e8bfdfae6708c351a6de1181b9 Mon Sep 17 00:00:00 2001
+From: Chikage <chikage@939.me>
+Date: Thu, 15 Sep 2022 14:00:38 +0800
+Subject: [PATCH] default disable fullcone6
+
+---
+ root/etc/config/firewall | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/root/etc/config/firewall b/root/etc/config/firewall
+index 7187723..88769e1 100644
+--- a/root/etc/config/firewall
++++ b/root/etc/config/firewall
+@@ -22,7 +22,7 @@ config zone
+ 	option output		ACCEPT
+ 	option forward		REJECT
+ 	option fullcone4 '1'
+-	option fullcone6 '1'
++	option fullcone6 '0'
+ 	option masq		1
+ 	option mtu_fix		1
+ 
+-- 
+2.36.0.windows.1
+
