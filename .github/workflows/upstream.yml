@@ -49,6 +49,9 @@ jobs:
         git clone --depth 1 https://github.com/Chikage0o0/Openwrt-Fullcone
         mv -n `find Openwrt-Fullcone/* -maxdepth 0 -type d` ./ && rm -rf Openwrt-Fullcone
 
+        #luci-app-xray
+        git clone --depth 1 https://github.com/yichya/luci-app-xray
+
         # uu游戏加速器
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-uugamebooster
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/uugamebooster
