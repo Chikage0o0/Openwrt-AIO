@@ -67,15 +67,17 @@ jobs:
 
         # passwall以及ssr-plus的依赖
         git clone --depth 1 -b packages https://github.com/Chikage0o0/openwrt-passwall
+        rm -rf openwrt-passwall/v2ray-geodata
         mv -n `find openwrt-passwall/* -maxdepth 0 -type d` ./ && rm -rf openwrt-passwall
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/redsocks2
+        git clone --depth 1 https://github.com/sbwml/v2ray-geodata
 
         # 迅雷快鸟
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-xlnetacc
 
         # mosdns
-        svn export https://github.com/QiuSimons/openwrt-mos/trunk/luci-app-mosdns
-        svn export https://github.com/QiuSimons/openwrt-mos/trunk/mosdns
+        svn export https://github.com/sbwml/luci-app-mosdns/trunk/luci-app-mosdns
+        svn export https://github.com/sbwml/luci-app-mosdns/trunk/mosdns
 
         # 主题
         svn export https://github.com/jerrykuku/luci-theme-argon/trunk ./luci-theme-argon
