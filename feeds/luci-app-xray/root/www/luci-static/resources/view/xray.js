@@ -6,10 +6,8 @@
 'require network';
 'require tools.widgets as widgets';
 
-function add_flow_and_stream_security_conf(s, tab_name, depends_field_name, protocol_name, have_xtls, client_side) {
-    var o;
-
-    o = s.taboption(tab_name, form.ListValue, `${protocol_name}_tls`, _(`[${protocol_name}] Stream Security`))
+function add_flow_and_stream_security_conf(s, tab_name, depends_field_name, protocol_name, have_xtls, have_tls_flow, client_side) {
+    let o = s.taboption(tab_name, form.ListValue, `${protocol_name}_tls`, _(`[${protocol_name}] Stream Security`))
     let odep = {}
     odep[depends_field_name] = protocol_name
     if (client_side) {
@@ -39,6 +37,24 @@ function add_flow_and_stream_security_conf(s, tab_name, depends_field_name, prot
         if (client_side) {
             o.value("xtls-rprx-splice", "xtls-rprx-splice")
             o.value("xtls-rprx-splice-udp443", "xtls-rprx-splice-udp443")
+        } else {
+            odep["web_server_enable"] = "1"
+        }
+        o.depends(odep)
+        o.rmempty = false
+        o.modalonly = true
+    }
+
+    if (have_tls_flow) {
+        o = s.taboption(tab_name, form.ListValue, `${protocol_name}_flow_tls`, _(`[${protocol_name}][tls] Flow`))
+        let odep = {}
+        odep[depends_field_name] = protocol_name
+        odep[`${protocol_name}_tls`] = "tls"
+        o.value("none", "none")
+        o.value("xtls-rprx-vision", "xtls-rprx-vision")
+        o.value("xtls-rprx-vision-udp443", "xtls-rprx-origin-udp443")
+        if (client_side) {
+            // wait for some other things
         } else {
             odep["web_server_enable"] = "1"
         }
@@ -102,9 +118,13 @@ function check_resource_files(load_result) {
     let geosite_existence = false;
     let geosite_size = 0;
     let firewall4 = false;
+    let xray_bin_default = false;
     let xray_running = false;
     let optional_features = {};
     for (const f of load_result) {
+        if (f.name == "xray") {
+            xray_bin_default = true;
+        }
         if (f.name == "xray.pid") {
             xray_running = true;
         }
@@ -116,7 +136,7 @@ function check_resource_files(load_result) {
             geosite_existence = true;
             geosite_size = '%.2mB'.format(f.size);
         }
-        if (f.name == "firewall_include.uc") {
+        if (f.name == "firewall_include.ut") {
             firewall4 = true;
         }
         if (f.name.startsWith("optional_feature_")) {
@@ -130,6 +150,7 @@ function check_resource_files(load_result) {
         geosite_size: geosite_size,
         optional_features: optional_features,
         firewall4: firewall4,
+        xray_bin_default: xray_bin_default,
         xray_running: xray_running,
     }
 }
@@ -146,9 +167,9 @@ return view.extend({
     render: function (load_result) {
         const config_data = load_result[0];
         const geoip_direct_code = uci.get_first(config_data, "general", "geoip_direct_code");
-        const { geoip_existence, geoip_size, geosite_existence, geosite_size, optional_features, firewall4, xray_running } = check_resource_files(load_result[1]);
+        const { geoip_existence, geoip_size, geosite_existence, geosite_size, optional_features, firewall4, xray_bin_default, xray_running } = check_resource_files(load_result[1]);
         const status_text = xray_running ? _("[Xray is running]") : _("[Xray is stopped]");
-        
+
         let asset_file_status = _('WARNING: at least one of asset files (geoip.dat, geosite.dat) is not found under /usr/share/xray. Xray may not work properly. See <a href="https://github.com/yichya/luci-app-xray">here</a> for help.')
         if (geoip_existence) {
             if (geosite_existence) {
@@ -156,8 +177,9 @@ return view.extend({
             }
         }
 
-        var m, s, o, ss;
-        m = new form.Map('xray', _('Xray'), status_text + " " + asset_file_status);
+        const m = new form.Map('xray', _('Xray'), status_text + " " + asset_file_status);
+
+        var s, o, ss;
 
         s = m.section(form.TypedSection, 'general');
         s.addremove = false;
@@ -166,15 +188,22 @@ return view.extend({
         s.tab('general', _('General Settings'));
 
         o = s.taboption('general', form.Value, 'xray_bin', _('Xray Executable Path'))
+        o.rmempty = false
+        if (xray_bin_default) {
+            o.value("/usr/bin/xray", _("/usr/bin/xray (default, exist)"))
+        }
 
         o = s.taboption('general', form.ListValue, 'main_server', _('TCP Server'))
         o.datatype = "uciname"
-        for (var v of uci.sections(config_data, "servers")) {
+        o.value("disabled", _("Disabled"))
+        for (const v of uci.sections(config_data, "servers")) {
             o.value(v[".name"], v.alias || v.server + ":" + v.server_port)
         }
 
         o = s.taboption('general', form.ListValue, 'tproxy_udp_server', _('UDP Server'))
-        for (var v of uci.sections(config_data, "servers")) {
+        o.datatype = "uciname"
+        o.value("disabled", _("Disabled"))
+        for (const v of uci.sections(config_data, "servers")) {
             o.value(v[".name"], v.alias || v.server + ":" + v.server_port)
         }
 
@@ -223,7 +252,7 @@ return view.extend({
         o.value("shadowsocks", "Shadowsocks")
         o.rmempty = false
 
-        add_flow_and_stream_security_conf(ss, "protocol", "protocol", "trojan", true, true)
+        add_flow_and_stream_security_conf(ss, "protocol", "protocol", "trojan", true, false, true)
 
         o = ss.taboption('protocol', form.ListValue, "shadowsocks_security", _("[shadowsocks] Encrypt Method"))
         o.depends("protocol", "shadowsocks")
@@ -242,7 +271,7 @@ return view.extend({
         o.rmempty = false
         o.modalonly = true
 
-        add_flow_and_stream_security_conf(ss, "protocol", "protocol", "shadowsocks", false, true)
+        add_flow_and_stream_security_conf(ss, "protocol", "protocol", "shadowsocks", false, false, true)
 
         o = ss.taboption('protocol', form.ListValue, "vmess_security", _("[vmess] Encrypt Method"))
         o.depends("protocol", "vmess")
@@ -264,7 +293,7 @@ return view.extend({
         o.rmempty = false
         o.modalonly = true
 
-        add_flow_and_stream_security_conf(ss, "protocol", "protocol", "vmess", false, true)
+        add_flow_and_stream_security_conf(ss, "protocol", "protocol", "vmess", false, false, true)
 
         o = ss.taboption('protocol', form.ListValue, "vless_encryption", _("[vless] Encrypt Method"))
         o.depends("protocol", "vless")
@@ -272,7 +301,7 @@ return view.extend({
         o.rmempty = false
         o.modalonly = true
 
-        add_flow_and_stream_security_conf(ss, "protocol", "protocol", "vless", true, true)
+        add_flow_and_stream_security_conf(ss, "protocol", "protocol", "vless", true, true, true)
 
         ss.tab('transport', _('Transport Settings'));
 
@@ -450,6 +479,14 @@ return view.extend({
         o.rmempty = true
         o.modalonly = true
 
+        o = ss.taboption('transport', form.ListValue, 'dialer_proxy', _('Dialer Proxy'), _('Similar to <a href="https://xtls.github.io/config/outbound.html#proxysettingsobject">ProxySettings.Tag</a>'))
+        o.datatype = "uciname"
+        o.value("disabled", _("Disabled"))
+        for (const v of uci.sections(config_data, "servers")) {
+            o.value(v[".name"], v.alias || v.server + ":" + v.server_port)
+        }
+        o.modalonly = true
+
         s.tab('proxy', _('Proxy Settings'));
 
         o = s.taboption('proxy', form.Value, 'tproxy_port_tcp', _('Transparent Proxy Port (TCP)'))
@@ -458,7 +495,7 @@ return view.extend({
 
         o = s.taboption('proxy', form.Value, 'tproxy_port_udp', _('Transparent Proxy Port (UDP)'))
         o.datatype = 'port'
-        o.default = 1080
+        o.default = 1081
 
         o = s.taboption('proxy', form.Value, 'socks_port', _('Socks5 Proxy Port'))
         o.datatype = 'port'
@@ -468,17 +505,13 @@ return view.extend({
         o.datatype = 'port'
         o.default = 1083
 
-        o = s.taboption('proxy', form.Value, 'dns_port', _('Xray DNS Server Port'), _("Do not use port 53 (dnsmasq), port 5353 (mDNS) or other common ports"))
-        o.datatype = 'port'
-        o.default = 5300
+        if (firewall4) {
+            o = s.taboption('proxy', form.DynamicList, 'uids_direct', _('Skip Proxy for uids'), _("Processes started by users with these uids won't be forwarded through Xray."))
+            o.datatype = "integer"
 
-        o = s.taboption('proxy', form.Value, 'dns_count', _('Extra DNS Server Ports'), _('Listen for DNS Requests on multiple ports (all of which serves as dnsmasq upstream servers).<br/>For example if Xray DNS Server Port is 5300 and use 3 extra ports, 5300 - 5303 will be used for DNS requests.<br/>Increasing this value may help reduce the possibility of temporary DNS lookup failures.'))
-        o.datatype = 'range(0, 50)'
-        o.default = 0
-
-        o = s.taboption('proxy', form.Value, 'mark', _('Socket Mark Number'), _('Avoid proxy loopback problems with local (gateway) traffic'))
-        o.datatype = 'range(1, 255)'
-        o.default = 255
+            o = s.taboption('proxy', form.DynamicList, 'gids_direct', _('Skip Proxy for gids'), _("Processes started by users in groups with these gids won't be forwarded through Xray."))
+            o.datatype = "integer"
+        }
 
         o = s.taboption('proxy', widgets.DeviceSelect, 'lan_ifaces', _("LAN Interface"))
         o.noaliases = true
@@ -540,20 +573,28 @@ return view.extend({
         }
         o.rmempty = true
 
-        s.tab('access_control', _('Transparent Proxy Rules'));
+        o = s.taboption('dns', form.Value, 'dns_port', _('Xray DNS Server Port'), _("Do not use port 53 (dnsmasq), port 5353 (mDNS) or other common ports"))
+        o.datatype = 'port'
+        o.default = 5300
+
+        o = s.taboption('dns', form.Value, 'dns_count', _('Extra DNS Server Ports'), _('Listen for DNS Requests on multiple ports (all of which serves as dnsmasq upstream servers).<br/>For example if Xray DNS Server Port is 5300 and use 3 extra ports, 5300 - 5303 will be used for DNS requests.<br/>Increasing this value may help reduce the possibility of temporary DNS lookup failures.'))
+        o.datatype = 'range(0, 50)'
+        o.default = 0
+
+        s.tab('transparent_proxy_rules', _('Transparent Proxy Rules'));
 
         if (geoip_direct_code === "upgrade" || geoip_direct_code === void 0) {
             if (geoip_existence) {
-                o = s.taboption('access_control', form.DynamicList, 'geoip_direct_code_list', _('GeoIP Direct Code List'), _("Hosts in these GeoIP sets will not be forwarded through Xray. Remove all items to forward all non-private hosts."))
+                o = s.taboption('transparent_proxy_rules', form.DynamicList, 'geoip_direct_code_list', _('GeoIP Direct Code List'), _("Hosts in these GeoIP sets will not be forwarded through Xray. Remove all items to forward all non-private hosts."))
             } else {
-                o = s.taboption('access_control', form.DynamicList, 'geoip_direct_code_list', _('GeoIP Direct Code List'), _("Resource file /usr/share/xray/geoip.dat not exist. All network traffic will be forwarded. <br/> Compile your firmware again with data files to use this feature, or<br/><a href=\"https://github.com/v2fly/geoip\">download one</a> (maybe disable transparent proxy first) and upload it to your router."))
+                o = s.taboption('transparent_proxy_rules', form.DynamicList, 'geoip_direct_code_list', _('GeoIP Direct Code List'), _("Resource file /usr/share/xray/geoip.dat not exist. All network traffic will be forwarded. <br/> Compile your firmware again with data files to use this feature, or<br/><a href=\"https://github.com/v2fly/geoip\">download one</a> (maybe disable transparent proxy first) and upload it to your router."))
                 o.readonly = true
             }
         } else {
             if (geoip_existence) {
-                o = s.taboption('access_control', form.Value, 'geoip_direct_code', _('GeoIP Direct Code'), _("Hosts in this GeoIP set will not be forwarded through Xray. <br/> Switching to new format (by selecting 'Unspecified') is recommended for multiple GeoIP options here, <br/> and is required if you want to forward all non-private hosts. This legacy option will be removed later."))
+                o = s.taboption('transparent_proxy_rules', form.Value, 'geoip_direct_code', _('GeoIP Direct Code'), _("Hosts in this GeoIP set will not be forwarded through Xray. <br/> Switching to new format (by selecting 'Unspecified') is recommended for multiple GeoIP options here, <br/> and is required if you want to forward all non-private hosts. This legacy option will be removed later."))
             } else {
-                o = s.taboption('access_control', form.Value, 'geoip_direct_code', _('GeoIP Direct Code'), _("Resource file /usr/share/xray/geoip.dat not exist. All network traffic will be forwarded. <br/> Compile your firmware again with data files to use this feature, or<br/><a href=\"https://github.com/v2fly/geoip\">download one</a> (maybe disable transparent proxy first) and upload it to your router."))
+                o = s.taboption('transparent_proxy_rules', form.Value, 'geoip_direct_code', _('GeoIP Direct Code'), _("Resource file /usr/share/xray/geoip.dat not exist. All network traffic will be forwarded. <br/> Compile your firmware again with data files to use this feature, or<br/><a href=\"https://github.com/v2fly/geoip\">download one</a> (maybe disable transparent proxy first) and upload it to your router."))
                 o.readonly = true
             }
         }
@@ -561,30 +602,26 @@ return view.extend({
         o.value("telegram", "telegram")
         o.datatype = "string"
 
-        o = s.taboption('access_control', form.ListValue, 'routing_domain_strategy', _('Routing Domain Strategy'), _("Domain resolution strategy when matching domain against rules."))
+        o = s.taboption('transparent_proxy_rules', form.ListValue, 'routing_domain_strategy', _('Routing Domain Strategy'), _("Domain resolution strategy when matching domain against rules."))
         o.value("AsIs", "AsIs")
         o.value("IPIfNonMatch", "IPIfNonMatch")
         o.value("IPOnDemand", "IPOnDemand")
         o.default = "AsIs"
         o.rmempty = false
 
-        if (firewall4) {
-            o = s.taboption('access_control', form.DynamicList, 'uids_direct', _('Skip Proxy for uids'), _("Processes started by users with these uids won't be forwarded through Xray."))
-            o.datatype = "integer"
+        o = s.taboption('transparent_proxy_rules', form.Value, 'mark', _('Socket Mark Number'), _('Avoid proxy loopback problems with local (gateway) traffic'))
+        o.datatype = 'range(1, 255)'
+        o.default = 255
 
-            o = s.taboption('access_control', form.DynamicList, 'gids_direct', _('Skip Proxy for gids'), _("Processes started by users in groups with these gids won't be forwarded through Xray."))
-            o.datatype = "integer"
-        }
-
-        o = s.taboption('access_control', form.DynamicList, "wan_bp_ips", _("Bypassed IP"), _("Requests to these IPs won't be forwarded through Xray."))
+        o = s.taboption('transparent_proxy_rules', form.DynamicList, "wan_bp_ips", _("Bypassed IP"), _("Requests to these IPs won't be forwarded through Xray."))
         o.datatype = "ip4addr"
         o.rmempty = true
 
-        o = s.taboption('access_control', form.DynamicList, "wan_fw_ips", _("Forwarded IP"))
+        o = s.taboption('transparent_proxy_rules', form.DynamicList, "wan_fw_ips", _("Forwarded IP"))
         o.datatype = "ip4addr"
         o.rmempty = true
 
-        o = s.taboption('access_control', form.SectionValue, "access_control_manual_tproxy", form.GridSection, 'manual_tproxy', _('Manual Transparent Proxy'), _('Compared to iptables REDIRECT, Xray could do NAT46 / NAT64 (for example accessing IPv6 only sites). See <a href="https://github.com/v2ray/v2ray-core/issues/2233">FakeDNS</a> for details.'))
+        o = s.taboption('transparent_proxy_rules', form.SectionValue, "access_control_manual_tproxy", form.GridSection, 'manual_tproxy', _('Manual Transparent Proxy'), _('Compared to iptables REDIRECT, Xray could do NAT46 / NAT64 (for example accessing IPv6 only sites). See <a href="https://github.com/v2ray/v2ray-core/issues/2233">FakeDNS</a> for details.'))
 
         ss = o.subsection;
         ss.sortable = false
@@ -619,7 +656,7 @@ return view.extend({
         o = ss.option(form.ListValue, 'force_forward_server_tcp', _('Force Forward server (TCP)'))
         o.depends("force_forward", "1")
         o.datatype = "uciname"
-        for (var v of uci.sections(config_data, "servers")) {
+        for (const v of uci.sections(config_data, "servers")) {
             o.value(v[".name"], v.alias || v.server + ":" + v.server_port)
         }
         o.modalonly = true
@@ -627,14 +664,20 @@ return view.extend({
         o = ss.option(form.ListValue, 'force_forward_server_udp', _('Force Forward server (UDP)'))
         o.depends("force_forward", "1")
         o.datatype = "uciname"
-        for (var v of uci.sections(config_data, "servers")) {
+        for (const v of uci.sections(config_data, "servers")) {
             o.value(v[".name"], v.alias || v.server + ":" + v.server_port)
         }
         o.modalonly = true
 
         s.tab('xray_server', _('HTTPS Server'));
 
-        o = s.taboption('xray_server', form.Flag, 'web_server_enable', _('Enable Xray HTTPS Server'), _("This will start a HTTPS server at port 443 which serves both as an inbound for Xray and a reverse proxy web server."));
+        o = s.taboption('xray_server', form.Flag, 'web_server_enable', _('Enable Xray HTTPS Server'), _("This will start a HTTPS server which serves both as an inbound for Xray and a reverse proxy web server."));
+
+        o = s.taboption('xray_server', form.Value, 'web_server_port', _('Xray HTTPS Server Port'), _("This port needs to be set <code>accept input</code> manually in firewall settings."))
+        o.datatype = 'port'
+        o.default = 443
+        o.depends("web_server_enable", "1")
+
         o = s.taboption('xray_server', form.FileUpload, 'web_server_cert_file', _('Certificate File'));
         o.root_directory = "/etc/luci-uploads/xray"
         o.depends("web_server_enable", "1")
@@ -649,9 +692,9 @@ return view.extend({
         o.rmempty = false
         o.depends("web_server_enable", "1")
 
-        add_flow_and_stream_security_conf(s, "xray_server", "web_server_protocol", "vless", true, false)
+        add_flow_and_stream_security_conf(s, "xray_server", "web_server_protocol", "vless", true, true, false)
 
-        add_flow_and_stream_security_conf(s, "xray_server", "web_server_protocol", "trojan", true, false)
+        add_flow_and_stream_security_conf(s, "xray_server", "web_server_protocol", "trojan", true, false, false)
 
         o = s.taboption('xray_server', form.Value, 'web_server_password', _('UserId / Password'), _('Fill user_id for vmess / VLESS, or password for shadowsocks / trojan (also supports <a href="https://github.com/XTLS/Xray-core/issues/158">Xray UUID Mapping</a>)'))
         o.depends("web_server_enable", "1")
@@ -746,7 +789,7 @@ return view.extend({
 
         o = ss.option(form.ListValue, "upstream", _("Upstream"))
         o.datatype = "uciname"
-        for (var v of uci.sections(config_data, "servers")) {
+        for (const v of uci.sections(config_data, "servers")) {
             o.value(v[".name"], v.alias || v.server + ":" + v.server_port)
         }
 

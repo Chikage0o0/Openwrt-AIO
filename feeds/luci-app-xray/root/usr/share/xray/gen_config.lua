@@ -7,10 +7,16 @@ local proxy_section = ucursor:get_first("xray", "general")
 local proxy = ucursor:get_all("xray", proxy_section)
 
 local tcp_server_section = arg[1] == nil and proxy.main_server or arg[1]
-local tcp_server = ucursor:get_all("xray", tcp_server_section)
+local tcp_server = nil
+if tcp_server_section ~= nil and tcp_server_section ~= "disabled" then
+    tcp_server = ucursor:get_all("xray", tcp_server_section)
+end
 
 local udp_server_section = arg[2] == nil and proxy.tproxy_udp_server or arg[2]
-local udp_server = ucursor:get_all("xray", udp_server_section)
+local udp_server = nil
+if udp_server_section ~= nil and udp_server_section ~= "disabled" then
+    udp_server = ucursor:get_all("xray", udp_server_section)
+end
 
 local geoip_existence = false
 local geosite_existence = false
@@ -36,10 +42,10 @@ local function split_ipv4_host_port(val, port_default)
     end
 end
 
-local function direct_outbound()
+local function direct_outbound(tag)
     return {
         protocol = "freedom",
-        tag = "direct",
+        tag = tag,
         settings = {
             domainStrategy = "UseIPv4"
         },
@@ -228,7 +234,7 @@ local function xtls_settings(server, protocol)
     return result
 end
 
-local function stream_settings(server, protocol, xtls)
+local function stream_settings(server, protocol, xtls, tag)
     local security = server[protocol .. "_tls"]
     local tlsSettings = nil
     local xtlsSettings = nil
@@ -237,11 +243,18 @@ local function stream_settings(server, protocol, xtls)
     elseif security == "xtls" and xtls then
         xtlsSettings = xtls_settings(server, protocol)
     end
+    local dialerProxySection = nil
+    local dialerProxy = nil
+    if server.dialer_proxy ~= nil and server.dialer_proxy ~= "disabled" then
+        dialerProxySection = server.dialer_proxy
+        dialerProxy = "dialer_proxy_" .. tag
+    end
     return {
         network = server.transport,
         sockopt = {
             mark = tonumber(proxy.mark),
-            domainStrategy = server.domain_strategy or "UseIP"
+            domainStrategy = server.domain_strategy or "UseIP",
+            dialerProxy = dialerProxy
         },
         security = security,
         tlsSettings = tlsSettings,
@@ -252,10 +265,11 @@ local function stream_settings(server, protocol, xtls)
         wsSettings = stream_ws(server),
         grpcSettings = stream_grpc(server),
         httpSettings = stream_h2(server)
-    }
+    }, dialerProxySection
 end
 
 local function shadowsocks_outbound(server, tag)
+    local streamSettings, dialerProxy = stream_settings(server, "shadowsocks", false, tag)
     return {
         protocol = "shadowsocks",
         tag = tag,
@@ -270,11 +284,12 @@ local function shadowsocks_outbound(server, tag)
                 }
             }
         },
-        streamSettings = stream_settings(server, "shadowsocks", false)
-    }
+        streamSettings = streamSettings
+    }, dialerProxy
 end
 
 local function vmess_outbound(server, tag)
+    local streamSettings, dialerProxy = stream_settings(server, "vmess", false, tag)
     return {
         protocol = "vmess",
         tag = tag,
@@ -293,15 +308,21 @@ local function vmess_outbound(server, tag)
                 }
             }
         },
-        streamSettings = stream_settings(server, "vmess", false)
-    }
+        streamSettings = streamSettings
+    }, dialerProxy
 end
 
 local function vless_outbound(server, tag)
-    local flow = server.vless_flow
-    if server.vless_flow == "none" then
+    local flow = nil
+    if server.vless_tls == "xtls" then
+        flow = server.vless_flow
+    elseif server.vless_tls == "tls" then
+        flow = server.vless_flow_tls
+    end
+    if flow == "none" then
         flow = nil
     end
+    local streamSettings, dialerProxy = stream_settings(server, "vless", true, tag)
     return {
         protocol = "vless",
         tag = tag,
@@ -320,15 +341,19 @@ local function vless_outbound(server, tag)
                 }
             }
         },
-        streamSettings = stream_settings(server, "vless", true)
-    }
+        streamSettings = streamSettings
+    }, dialerProxy
 end
 
 local function trojan_outbound(server, tag)
-    local flow = server.trojan_flow
-    if server.trojan_flow == "none" then
+    local flow = nil
+    if server.trojan_tls == "xtls" then
+        flow = server.trojan_flow
+    end
+    if flow == "none" then
         flow = nil
     end
+    local streamSettings, dialerProxy = stream_settings(server, "trojan", true, tag)
     return {
         protocol = "trojan",
         tag = tag,
@@ -342,24 +367,43 @@ local function trojan_outbound(server, tag)
                 }
             }
         },
-        streamSettings = stream_settings(server, "trojan", true)
-    }
+        streamSettings = streamSettings
+    }, dialerProxy
+end
+
+local function server_outbound_recursive(t, server, tag)
+    local outbound = nil
+    local dialerProxy = nil
+    if server.protocol == "vmess" then
+        outbound, dialerProxy = vmess_outbound(server, tag)
+    elseif server.protocol == "vless" then
+        outbound, dialerProxy = vless_outbound(server, tag)
+    elseif server.protocol == "shadowsocks" then
+        outbound, dialerProxy = shadowsocks_outbound(server, tag)
+    elseif server.protocol == "trojan" then
+        outbound, dialerProxy = trojan_outbound(server, tag)
+    end
+    if outbound == nil then
+        error("unknown outbound server protocol")
+    end
+
+    local result = {outbound}
+    for _, f in ipairs(t) do
+        table.insert(result, 1, f)
+    end
+    if dialerProxy ~= nil then
+        local dialer_proxy_section = ucursor:get_all("xray", dialerProxy)
+        return server_outbound_recursive(result, dialer_proxy_section, "dialer_proxy_" .. tag)
+    else
+        return result
+    end
 end
 
 local function server_outbound(server, tag)
-    if server.protocol == "vmess" then
-        return vmess_outbound(server, tag)
+    if server == nil then
+        return {direct_outbound(tag)}
     end
-    if server.protocol == "vless" then
-        return vless_outbound(server, tag)
-    end
-    if server.protocol == "shadowsocks" then
-        return shadowsocks_outbound(server, tag)
-    end
-    if server.protocol == "trojan" then
-        return trojan_outbound(server, tag)
-    end
-    error("unknown outbound server protocol")
+    return server_outbound_recursive({}, server, tag)
 end
 
 local function tproxy_tcp_inbound()
@@ -445,16 +489,37 @@ local function fallbacks()
     return f
 end
 
-local function https_trojan_inbound()
+local function tls_inbound_settings()
     return {
-        port = 443,
+        alpn = {
+            "http/1.1"
+        },
+        certificates = {
+            {
+                certificateFile = proxy.web_server_cert_file,
+                keyFile = proxy.web_server_key_file
+            }
+        }
+    }
+end
+
+local function https_trojan_inbound()
+    local flow = nil
+    if proxy.trojan_tls == "xtls" then
+        flow = proxy.trojan_flow
+    end
+    if flow == "none" then
+        flow = nil
+    end
+    return {
+        port = proxy.web_server_port or 443,
         protocol = "trojan",
         tag = "https_inbound",
         settings = {
             clients = {
                 {
                     password = proxy.web_server_password,
-                    flow = proxy.trojan_tls == "xtls" and proxy.trojan_flow or nil
+                    flow = flow
                 }
             },
             fallbacks = fallbacks()
@@ -462,42 +527,31 @@ local function https_trojan_inbound()
         streamSettings = {
             network = "tcp",
             security = proxy.trojan_tls,
-            tlsSettings = proxy.trojan_tls == "tls" and {
-                alpn = {
-                    "http/1.1"
-                },
-                certificates = {
-                    {
-                        certificateFile = proxy.web_server_cert_file,
-                        keyFile = proxy.web_server_key_file
-                    }
-                }
-            } or nil,
-            xtlsSettings = proxy.trojan_tls == "xtls" and {
-                alpn = {
-                    "http/1.1"
-                },
-                certificates = {
-                    {
-                        certificateFile = proxy.web_server_cert_file,
-                        keyFile = proxy.web_server_key_file
-                    }
-                }
-            } or nil
+            tlsSettings = proxy.trojan_tls == "tls" and tls_inbound_settings() or nil,
+            xtlsSettings = proxy.trojan_tls == "xtls" and tls_inbound_settings() or nil
         }
     }
 end
 
 local function https_vless_inbound()
+    local flow = nil
+    if proxy.vless_tls == "xtls" then
+        flow = proxy.vless_flow
+    elseif proxy.vless_tls == "tls" then
+        flow = proxy.vless_flow_tls
+    end
+    if flow == "none" then
+        flow = nil
+    end
     return {
-        port = 443,
+        port = proxy.web_server_port or 443,
         protocol = "vless",
         tag = "https_inbound",
         settings = {
             clients = {
                 {
                     id = proxy.web_server_password,
-                    flow = proxy.vless_tls == "xtls" and proxy.vless_flow or nil
+                    flow = flow
                 }
             },
             decryption = "none",
@@ -506,28 +560,8 @@ local function https_vless_inbound()
         streamSettings = {
             network = "tcp",
             security = proxy.vless_tls,
-            tlsSettings = proxy.vless_tls == "tls" and {
-                alpn = {
-                    "http/1.1"
-                },
-                certificates = {
-                    {
-                        certificateFile = proxy.web_server_cert_file,
-                        keyFile = proxy.web_server_key_file
-                    }
-                }
-            } or nil,
-            xtlsSettings = proxy.vless_tls == "xtls" and {
-                alpn = {
-                    "http/1.1"
-                },
-                certificates = {
-                    {
-                        certificateFile = proxy.web_server_cert_file,
-                        keyFile = proxy.web_server_key_file
-                    }
-                }
-            } or nil
+            tlsSettings = proxy.vless_tls == "tls" and tls_inbound_settings() or nil,
+            xtlsSettings = proxy.vless_tls == "xtls" and tls_inbound_settings() or nil
         }
     }
 end
@@ -544,8 +578,8 @@ end
 
 local function dns_server_inbounds()
     local result = {}
+    local default_dns_ip, default_dns_port = split_ipv4_host_port(proxy.default_dns, 53)
     for i = proxy.dns_port, proxy.dns_port + (proxy.dns_count or 0), 1 do
-        local default_dns_ip, default_dns_port = split_ipv4_host_port(proxy.default_dns, 53)
         table.insert(result, {
             port = i,
             protocol = "dokodemo-door",
@@ -581,11 +615,20 @@ local function dns_server_outbound()
 end
 
 local function upstream_domain_names()
-    local result = {
-        tcp_server.server,
-    }
-    if tcp_server.server ~= udp_server.server then
-        table.insert(result, udp_server.server)
+    local domain_names = {}
+    local hash = {}
+    local result = {}
+    if tcp_server ~= nil then
+        table.insert(domain_names, tcp_server.server)
+    end
+    if udp_server ~= nil then
+        table.insert(domain_names, udp_server.server)
+    end
+    for _, v in ipairs(domain_names) do
+        if (not hash[v]) then
+            result[#result+1] = v
+            hash[v] = true
+        end
     end
     return result
 end
@@ -738,13 +781,15 @@ local function manual_tproxy_outbounds()
         local tcp_tag = "direct"
         local udp_tag = "direct"
         if v.force_forward == "1" then
-            if v.force_forward_server_tcp ~= nil then 
+            if v.force_forward_server_tcp ~= nil then
                 if v.force_forward_server_tcp == proxy.main_server then
                     tcp_tag = "tcp_outbound"
                 else
                     tcp_tag = string.format("manual_tproxy_force_forward_tcp_outbound_%d", i)
                     local force_forward_server_tcp = ucursor:get_all("xray", v.force_forward_server_tcp)
-                    table.insert(result, server_outbound(force_forward_server_tcp, tcp_tag))
+                    for _, f in ipairs(server_outbound(force_forward_server_tcp, tcp_tag)) do
+                        table.insert(result, f)
+                    end
                 end
             else
                 tcp_tag = "tcp_outbound"
@@ -755,7 +800,9 @@ local function manual_tproxy_outbounds()
                 else
                     udp_tag = string.format("manual_tproxy_force_forward_udp_outbound_%d", i)
                     local force_forward_server_udp = ucursor:get_all("xray", v.force_forward_server_udp)
-                    table.insert(result, server_outbound(force_forward_server_udp, udp_tag))
+                    for _, f in ipairs(server_outbound(force_forward_server_udp, udp_tag)) do
+                        table.insert(result, f)
+                    end                
                 end
             else
                 udp_tag = "udp_outbound"
@@ -830,7 +877,9 @@ local function bridge_outbounds()
     ucursor:foreach("xray", "bridge", function(v)
         i = i + 1
         local bridge_server = ucursor:get_all("xray", v.upstream)
-        table.insert(result, 1, server_outbound(bridge_server, string.format("bridge_upstream_outbound_%d", i)))
+        for _, f in ipairs(server_outbound(bridge_server, string.format("bridge_upstream_outbound_%d", i))) do
+            table.insert(result, 1, f)
+        end
         table.insert(result, 1, {
             tag = string.format("bridge_freedom_outbound_%d", i),
             protocol = "freedom",
@@ -962,12 +1011,16 @@ end
 
 local function outbounds()
     local result = {
-        server_outbound(tcp_server, "tcp_outbound"),
-        server_outbound(udp_server, "udp_outbound"),
-        direct_outbound(),
+        direct_outbound("direct"),
         dns_server_outbound(),
         blackhole_outbound()
     }
+    for _, v in ipairs(server_outbound(tcp_server, "tcp_outbound")) do
+        table.insert(result, v)
+    end
+    for _, v in ipairs(server_outbound(udp_server, "udp_outbound")) do
+        table.insert(result, v)
+    end
     for _, v in ipairs(manual_tproxy_outbounds()) do
         table.insert(result, v)
     end
