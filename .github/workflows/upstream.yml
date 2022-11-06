@@ -19,7 +19,6 @@ on:
 
 jobs:
   merge:
-    if: github.event.repository.owner.id == github.event.sender.id
     runs-on: Ubuntu-20.04
 
     steps:
@@ -41,13 +40,6 @@ jobs:
         git rm -r --cache * >/dev/null 2>&1 &
         rm -rf ./feeds >/dev/null 2>&1
         mkdir feeds && cd feeds
-
-        # miniupnpd支持强行映射
-        #svn export https://github.com/hzyitc/miniupnpd-openwrt-ptpt52-mod/trunk/miniupnpd
-
-        #fullcone
-        git clone --depth 1 https://github.com/Chikage0o0/Openwrt-Fullcone
-        mv -n `find Openwrt-Fullcone/* -maxdepth 0 -type d` ./ && rm -rf Openwrt-Fullcone
 
         #luci-app-xray
         git clone --depth 1 https://github.com/yichya/luci-app-xray
