@@ -47,7 +47,6 @@ function mvKmod(){
 }
 
 mvKmod "kmod-r8125*.ipk"
-mvKmod "kmod-nft-fullcone*.ipk"
 
 # 删除旧的ipk
 if [[ $1 == "true" ]];then
