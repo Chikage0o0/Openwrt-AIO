@@ -52,12 +52,6 @@ jobs:
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-vlmcsd 
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/vlmcsd
         
-        # netkeeper
-        svn export https://github.com/Chikage0o0/feed-netkeeper/trunk/luci-app-netkeeper-interception
-        svn export https://github.com/Chikage0o0/feed-netkeeper/trunk/luci-proto-netkeeper
-        svn export https://github.com/Chikage0o0/feed-netkeeper/trunk/netkeeper-interception
-        svn export https://github.com/Chikage0o0/feed-netkeeper/trunk/netkeeper
-
         # ssr-plus
         svn export https://github.com/immortalwrt/luci/branches/openwrt-21.02/applications/luci-app-ssr-plus
         
