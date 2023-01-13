@@ -1,7 +1,7 @@
 #
 # This is free software, lisence use MIT.
-# 
-# 
+#
+#
 # <https://github.com/Chikage0o0/openwrt-packages>
 #
 
@@ -22,82 +22,80 @@ on:
 
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
-  VERSION: 22.03.2
+  VERSION: 22.03.3
   USE_TG: true
-  
+
 jobs:
   compile-ipk:
     runs-on: Ubuntu-20.04
 
-    strategy: 
-      fail-fast: false   
+    strategy:
+      fail-fast: false
       matrix:
-        target: [x86-64,ramips-mt7621,rockchip-armv8]
+        target: [x86-64, ramips-mt7621, rockchip-armv8]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@main
-      with:
-        fetch-depth: 2
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 2
 
-    - name: 配置RCLONE
-      uses: NiceLabs/rclone-action@master
-      with:
-        github-token: ${{ secrets.SECRET_TOKEN }}
-        config: ${{ secrets.RCLONE_CONFIG }}
-        config-secret-name: RCLONE_CONFIG
+      - name: 配置RCLONE
+        uses: NiceLabs/rclone-action@master
+        with:
+          github-token: ${{ secrets.SECRET_TOKEN }}
+          config: ${{ secrets.RCLONE_CONFIG }}
+          config-secret-name: RCLONE_CONFIG
 
+      - name: 准备环境
+        run: |
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
+          mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
+          rclone copy $REMOTE_PATH/$VERSION/${{matrix.target}} /workdir/packages/ || true
+          echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
+          docker run -dt --name sdk -v /workdir/packages/:/home/build/packages/  \
+              -v /workdir/key-build:/home/build/openwrt/key-build  \
+              -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
+              -v $GITHUB_WORKSPACE/diy/config/${{matrix.target}}.config:/home/build/openwrt/custom.config \
+              -v /workdir/error/:/home/build/openwrt/error/  \
+               openwrtorg/sdk:${{matrix.target}}-$VERSION
 
-    - name: 准备环境
-      run: |
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
-        mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
-        rclone copy $REMOTE_PATH/$VERSION/${{matrix.target}} /workdir/packages/ || true
-        echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
-        docker run -dt --name sdk -v /workdir/packages/:/home/build/packages/  \
-            -v /workdir/key-build:/home/build/openwrt/key-build  \
-            -v $GITHUB_WORKSPACE:/home/build/custom-feed/ \
-            -v $GITHUB_WORKSPACE/diy/config/${{matrix.target}}.config:/home/build/openwrt/custom.config \
-            -v /workdir/error/:/home/build/openwrt/error/  \
-             openwrtorg/sdk:${{matrix.target}}-$VERSION
+      - name: SSH connection to Actions
+        if: github.event.inputs.ssh == 'true'
+        uses: mxschmitt/action-tmate@v1
 
-    - name: SSH connection to Actions
-      if: github.event.inputs.ssh == 'true'
-      uses: mxschmitt/action-tmate@v1
+      - name: 编译
+        if: github.event.inputs.ssh != 'true'
+        run: docker exec sdk /bin/bash /home/build/custom-feed/diy/sh/compile.sh ${{ github.event.inputs.rebuild }}
 
-    - name: 编译
-      if: github.event.inputs.ssh != 'true'
-      run: docker exec sdk /bin/bash /home/build/custom-feed/diy/sh/compile.sh ${{ github.event.inputs.rebuild }}
+      - name: 编译完成后清理
+        run: |
+          docker rm -f sdk
+          if [`ls -A /workdir/error/` == ""] ;then
+            echo "compile_error=false" >> $GITHUB_ENV
+          else
+            echo "compile_error=true" >> $GITHUB_ENV
+          fi
+          sudo chown -R $USER:$GROUPS /workdir
+          sudo chown -R $USER:$GROUPS $GITHUB_WORKSPACE
 
-    - name: 编译完成后清理
-      run: |
-        docker rm -f sdk
-        if [`ls -A /workdir/error/` == ""] ;then
-          echo "compile_error=false" >> $GITHUB_ENV
-        else
-          echo "compile_error=true" >> $GITHUB_ENV
-        fi
-        sudo chown -R $USER:$GROUPS /workdir
-        sudo chown -R $USER:$GROUPS $GITHUB_WORKSPACE
+      - name: 如果出现失败上传Artifact
+        if: env.compile_error == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{matrix.target}}-error
+          path: /workdir/error/
 
-    - name: 如果出现失败上传Artifact
-      if: env.compile_error == 'true'
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{matrix.target}}-error
-        path: /workdir/error/
-    
-    - name: 如果出现失败通知TG
-      if: env.compile_error == 'true' && env.USE_TG == 'true'
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.TELEGRAM_TO }}
-        token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: some errors in compile
-        
-    - name: 上传至目标存储
-      run: |
-        rclone delete $REMOTE_PATH/$VERSION/${{matrix.target}}/ || true
-        rclone copy /workdir/packages/ $REMOTE_PATH/$VERSION/${{matrix.target}}/
-    
+      - name: 如果出现失败通知TG
+        if: env.compile_error == 'true' && env.USE_TG == 'true'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: some errors in compile
+
+      - name: 上传至目标存储
+        run: |
+          rclone delete $REMOTE_PATH/$VERSION/${{matrix.target}}/ || true
+          rclone copy /workdir/packages/ $REMOTE_PATH/$VERSION/${{matrix.target}}/

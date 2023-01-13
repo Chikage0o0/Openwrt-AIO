@@ -2,7 +2,7 @@
 
 #edit feeds
 sed -i 's/downloads.openwrt.org/mirrors.ustc.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
-[ "$(grep "custom" /etc/opkg/distfeeds.conf)" == "" ] && echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/22.03.2/rockchip-armv8' >> /etc/opkg/distfeeds.conf
+[ "$(grep "custom" /etc/opkg/distfeeds.conf)" == "" ] && echo 'src/gz custom https://drive.939.me/api/raw/?path=/Openwrt/Package/22.03.3/rockchip-armv8' >> /etc/opkg/distfeeds.conf
 
 [ "$(uci -q get system.@system[0].init)" != "" ] && exit 0
 #set lan ip

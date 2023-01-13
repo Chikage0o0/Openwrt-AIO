@@ -1,7 +1,7 @@
 #
 # This is free software, lisence use MIT.
-# 
-# 
+#
+#
 # <https://github.com/Chikage0o0/openwrt-packages>
 #
 
@@ -15,91 +15,88 @@ on:
         default: 'false'
   schedule:
     - cron: 0 0 1 * *
-  
+
 env:
   REMOTE_PATH: drive:Public/Openwrt/Package
-  VERSION: 22.03.2
+  VERSION: 22.03.3
   USE_TG: false
 
 jobs:
   image-build:
     runs-on: Ubuntu-20.04
 
-    strategy: 
-      fail-fast: false   
+    strategy:
+      fail-fast: false
       matrix:
-        target: [x86-64,ramips-mt7621,rockchip-armv8]
+        target: [x86-64, ramips-mt7621, rockchip-armv8]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@main
+      - name: Checkout
+        uses: actions/checkout@main
 
-    - name: 配置RCLONE
-      uses: NiceLabs/rclone-action@master
-      with:
-        github-token: ${{ secrets.SECRET_TOKEN }}
-        config: ${{ secrets.RCLONE_CONFIG }}
-        config-secret-name: RCLONE_CONFIG
+      - name: 配置RCLONE
+        uses: NiceLabs/rclone-action@master
+        with:
+          github-token: ${{ secrets.SECRET_TOKEN }}
+          config: ${{ secrets.RCLONE_CONFIG }}
+          config-secret-name: RCLONE_CONFIG
 
-    - name: 准备环境
-      run: |
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
-        mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
-        rclone copy $REMOTE_PATH/$VERSION/${{matrix.target}} /workdir/packages/ || true
-        echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
-        docker run -dt --name imagebuilder -v /workdir/packages/:/home/build/openwrt/packages/  \
-            -v $GITHUB_WORKSPACE/diy/sh/target/${{matrix.target}}.sh:/home/build/openwrt/target.sh \
-            -v $GITHUB_WORKSPACE/diy/sh/imagebuild.sh:/home/build/openwrt/imagebuild.sh \
-            -v $GITHUB_WORKSPACE/diy/files/${{matrix.target}}/:/home/build/openwrt/files/  \
-            -v $GITHUB_WORKSPACE/diy/tool/:/home/build/openwrt/tool/ \
-            -v /workdir/bin/target/:/home/build/openwrt/bin/targets/  \
-             openwrtorg/imagebuilder:${{matrix.target}}-$VERSION
-        
-    - name: SSH connection to Actions
-      if: github.event.inputs.ssh == 'true'
-      uses: mxschmitt/action-tmate@v1
+      - name: 准备环境
+        run: |
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
+          mkdir -p /workdir/packages/ $$ mkdir -p /workdir/error/
+          rclone copy $REMOTE_PATH/$VERSION/${{matrix.target}} /workdir/packages/ || true
+          echo "${{ secrets.SECRET_KEY }}" > /workdir/key-build
+          docker run -dt --name imagebuilder -v /workdir/packages/:/home/build/openwrt/packages/  \
+              -v $GITHUB_WORKSPACE/diy/sh/target/${{matrix.target}}.sh:/home/build/openwrt/target.sh \
+              -v $GITHUB_WORKSPACE/diy/sh/imagebuild.sh:/home/build/openwrt/imagebuild.sh \
+              -v $GITHUB_WORKSPACE/diy/files/${{matrix.target}}/:/home/build/openwrt/files/  \
+              -v $GITHUB_WORKSPACE/diy/tool/:/home/build/openwrt/tool/ \
+              -v /workdir/bin/target/:/home/build/openwrt/bin/targets/  \
+               openwrtorg/imagebuilder:${{matrix.target}}-$VERSION
 
-    - name: 编译
-      if: github.event.inputs.ssh != 'true'
-      run: docker exec  imagebuilder /bin/bash /home/build/openwrt/imagebuild.sh
+      - name: SSH connection to Actions
+        if: github.event.inputs.ssh == 'true'
+        uses: mxschmitt/action-tmate@v1
 
-    - name: 编译完成后清理
-      run: |
-        docker rm -f imagebuilder
-        sudo chown -R $USER:$GROUPS /workdir
-        sudo chown -R $USER:$GROUPS $GITHUB_WORKSPACE
-        if [[ `find /workdir/bin/target/ -name *.img.gz -or  -name *.bin` ]] ;then
-          echo "image_build=true" >> $GITHUB_ENV
-        else
-          echo "image_build=false" >> $GITHUB_ENV
-        fi
+      - name: 编译
+        if: github.event.inputs.ssh != 'true'
+        run: docker exec  imagebuilder /bin/bash /home/build/openwrt/imagebuild.sh
 
-    - name: 移动编译完成的固件
-      if: env.image_build == 'true'
-      run: |
-        mkdir /workdir/image
-        for img in `find /workdir/bin/target/ -name *.img.gz -or  -name *sysupgrade.bin`; do
-          mv $img /workdir/image
-        done
+      - name: 编译完成后清理
+        run: |
+          docker rm -f imagebuilder
+          sudo chown -R $USER:$GROUPS /workdir
+          sudo chown -R $USER:$GROUPS $GITHUB_WORKSPACE
+          if [[ `find /workdir/bin/target/ -name *.img.gz -or  -name *.bin` ]] ;then
+            echo "image_build=true" >> $GITHUB_ENV
+          else
+            echo "image_build=false" >> $GITHUB_ENV
+          fi
 
-    - name: 生成Release信息
-      id: tag
-      if: env.image_build == 'true'
-      run: |
-        echo "::set-output name=release_body::本次固件编译于$(date +"%Y.%m.%d")"
+      - name: 移动编译完成的固件
+        if: env.image_build == 'true'
+        run: |
+          mkdir /workdir/image
+          for img in `find /workdir/bin/target/ -name *.img.gz -or  -name *sysupgrade.bin`; do
+            mv $img /workdir/image
+          done
 
-    - name: 上传固件到Release
-      uses: ncipollo/release-action@v1
-      with:
-        name: Openwrt ${{env.VERSION}}_${{matrix.target}}
-        allowUpdates: true
-        body: ${{ steps.tag.outputs.release_body }}
-        tag: Openwrt_${{env.VERSION}}_${{matrix.target}}
-        commit: main
-        replacesArtifacts: true
-        token: ${{ secrets.SECRET_TOKEN }}
-        artifacts: /workdir/image/*
+      - name: 生成Release信息
+        id: tag
+        if: env.image_build == 'true'
+        run: |
+          echo "::set-output name=release_body::本次固件编译于$(date +"%Y.%m.%d")"
 
-    
-    
+      - name: 上传固件到Release
+        uses: ncipollo/release-action@v1
+        with:
+          name: Openwrt ${{env.VERSION}}_${{matrix.target}}
+          allowUpdates: true
+          body: ${{ steps.tag.outputs.release_body }}
+          tag: Openwrt_${{env.VERSION}}_${{matrix.target}}
+          commit: main
+          replacesArtifacts: true
+          token: ${{ secrets.SECRET_TOKEN }}
+          artifacts: /workdir/image/*
