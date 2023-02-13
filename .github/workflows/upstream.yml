@@ -68,6 +68,7 @@ jobs:
         # passwall以及ssr-plus的依赖
         git clone --depth 1 -b packages https://github.com/Chikage0o0/openwrt-passwall
         rm -rf openwrt-passwall/v2ray-geodata
+        rm -rf openwrt-passwall/sing-box
         mv -n `find openwrt-passwall/* -maxdepth 0 -type d` ./ && rm -rf openwrt-passwall
         svn export https://github.com/immortalwrt/packages/branches/openwrt-21.02/net/redsocks2
         git clone --depth 1 https://github.com/sbwml/v2ray-geodata
