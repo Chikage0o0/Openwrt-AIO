@@ -78,6 +78,9 @@ jobs:
         # mosdns
         svn export https://github.com/sbwml/luci-app-mosdns/trunk/luci-app-mosdns
         svn export https://github.com/sbwml/luci-app-mosdns/trunk/mosdns
+        
+        # sing-box
+        svn export https://github.com/Chikage0o0/sing-box_openwrt/trunk/sing-box
 
         # 主题
         svn export https://github.com/jerrykuku/luci-theme-argon/trunk ./luci-theme-argon
